@@ -7,7 +7,7 @@
 const CONFIG = {
     // URL del Google Apps Script (Web App)
     // Ejemplo: 'https://script.google.com/macros/s/AKfycbx.../exec'
-    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzADZgy9KXhqeHtPmEN69VYZcGzlvSwfeI-8NIg7dXrAcL4nGHMaDAZOXfsjh_vt_0tvg/exec',
+    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz87pxkcsMDOzp_kHU_25wzbWDvrCboC8PIShp4YbseXfVMtZKYV8mJM8VXAxsWgCdE8w/exec',
     
     // Símbolos para mostrar en el ticker del mercado
     MARKET_SYMBOLS: ['GGAL', 'YPF', 'AAPL', 'GOOGL', 'MSFT', 'MELI'],
