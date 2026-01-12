@@ -258,10 +258,10 @@ async function loadUserData() {
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo
-            AppState.transactions = DEMO_DATA.transactions.filter(t => t.userId === AppState.user.email);
+            AppState.transactions = DEMO_DATA.transactions.filter(t => t.userId === AppState.user.user);
         } else {
             // Llamar al Google Apps Script
-            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getTransactions&email=${encodeURIComponent(AppState.user.email)}`);
+            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getTransactions&user=${encodeURIComponent(AppState.user.user)}`);
             const data = await response.json();
             
             if (data.success) {
@@ -437,7 +437,7 @@ async function handleAddTransaction(e) {
     
     const transaction = {
         id: Date.now().toString(),
-        userId: AppState.user.email,
+        userId: AppState.user.user,
         ticker,
         tickerName,
         date,
@@ -496,7 +496,7 @@ async function deleteTransaction(transactionId) {
             if (stateIndex > -1) AppState.transactions.splice(stateIndex, 1);
         } else {
             // Eliminar de Google Sheets
-            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=deleteTransaction&id=${transactionId}&email=${encodeURIComponent(AppState.user.email)}`);
+            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=deleteTransaction&id=${transactionId}&user=${encodeURIComponent(AppState.user.user)}`);
             const data = await response.json();
             
             if (data.success) {
