@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wealth Portfolio | Tu Patrimonio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="theme-light">
+    <!-- Pantalla de carga -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader">
+            <div class="loader-ring"></div>
+            <span class="loader-text">Cargando...</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-gem"></i>
+                <span>Wealth Portfolio</span>
+            </div>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn-icon" title="Cambiar tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div id="user-info" class="user-info hidden">
+                    <span id="user-name"></span>
+                    <button id="logout-btn" class="btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modal Login/Register -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content auth-modal-content">
+            <div class="auth-header">
+                <i class="fas fa-gem auth-icon"></i>
+                <h2>Bienvenido</h2>
+                <p>Gestiona tu patrimonio con elegancia</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Iniciar Sesión</button>
+                <button class="auth-tab" data-tab="register">Registrarse</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary btn-full">
+                    <span>Ingresar</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="register-name">Nombre</label>
+                    <input type="text" id="register-name" required placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Contraseña</label>
+                    <input type="password" id="register-password" required minlength="6" placeholder="Mínimo 6 caracteres">
+                </div>
+                <button type="submit" class="btn-primary btn-full">
+                    <span>Crear Cuenta</span>
+                    <i class="fas fa-user-plus"></i>
+                </button>
+            </form>
+
+            <div id="auth-error" class="auth-error hidden"></div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal (Solo visible después de login) -->
+    <main id="main-content" class="main-content hidden">
+        <!-- Hero Section con resumen -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="portfolio-summary">
+                    <div class="summary-card main-value">
+                        <span class="summary-label">Patrimonio Total</span>
+                        <span id="total-value-ars" class="summary-value">$0</span>
+                        <span id="total-value-usd" class="summary-secondary">USD $0</span>
+                    </div>
+                    <div class="summary-cards-row">
+                        <div class="summary-card">
+                            <span class="summary-label">Inversión Total</span>
+                            <span id="total-invested" class="summary-value small">$0</span>
+                        </div>
+                        <div class="summary-card">
+                            <span class="summary-label">Ganancia/Pérdida</span>
+                            <span id="total-profit" class="summary-value small profit">$0</span>
+                            <span id="total-profit-percent" class="summary-percent">0%</span>
+                        </div>
+                        <div class="summary-card">
+                            <span class="summary-label">Cotización USD</span>
+                            <span id="current-usd" class="summary-value small">$0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Acciones Populares (visible sin login también) -->
+        <section class="market-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Mercado Hoy
+                </h2>
+                <div id="market-ticker" class="market-ticker">
+                    <div class="ticker-item">
+                        <span class="ticker-symbol">AAPL</span>
+                        <span class="ticker-price">--</span>
+                        <span class="ticker-change">--</span>
+                    </div>
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Agregar Transacción -->
+        <section class="add-transaction-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-plus-circle"></i>
+                        Nueva Compra
+                    </h2>
+                    <button id="toggle-form" class="btn-secondary">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                
+                <form id="transaction-form" class="transaction-form collapsed">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stock-select">Acción</label>
+                            <select id="stock-select" required>
+                                <option value="">Seleccionar acción...</option>
+                                <optgroup label="Argentina (BYMA)">
+                                    <option value="GGAL.BA">GGAL - Grupo Galicia</option>
+                                    <option value="YPF.BA">YPF - YPF S.A.</option>
+                                    <option value="PAMP.BA">PAMP - Pampa Energía</option>
+                                    <option value="TXAR.BA">TXAR - Ternium Argentina</option>
+                                    <option value="ALUA.BA">ALUA - Aluar</option>
+                                    <option value="BBAR.BA">BBAR - Banco BBVA</option>
+                                    <option value="BMA.BA">BMA - Banco Macro</option>
+                                    <option value="SUPV.BA">SUPV - Supervielle</option>
+                                    <option value="CEPU.BA">CEPU - Central Puerto</option>
+                                    <option value="TECO2.BA">TECO2 - Telecom</option>
+                                    <option value="MIRG.BA">MIRG - Mirgor</option>
+                                    <option value="CRES.BA">CRES - Cresud</option>
+                                    <option value="LOMA.BA">LOMA - Loma Negra</option>
+                                    <option value="TGSU2.BA">TGSU2 - TGS</option>
+                                    <option value="VALO.BA">VALO - Grupo Valores</option>
+                                </optgroup>
+                                <optgroup label="CEDEARs">
+                                    <option value="AAPL.BA">AAPL - Apple</option>
+                                    <option value="GOOGL.BA">GOOGL - Google</option>
+                                    <option value="MSFT.BA">MSFT - Microsoft</option>
+                                    <option value="AMZN.BA">AMZN - Amazon</option>
+                                    <option value="TSLA.BA">TSLA - Tesla</option>
+                                    <option value="META.BA">META - Meta</option>
+                                    <option value="NVDA.BA">NVDA - Nvidia</option>
+                                    <option value="MELI.BA">MELI - MercadoLibre</option>
+                                    <option value="KO.BA">KO - Coca Cola</option>
+                                    <option value="DIS.BA">DIS - Disney</option>
+                                    <option value="NFLX.BA">NFLX - Netflix</option>
+                                    <option value="BA.BA">BA - Boeing</option>
+                                    <option value="JPM.BA">JPM - JP Morgan</option>
+                                    <option value="V.BA">V - Visa</option>
+                                    <option value="WMT.BA">WMT - Walmart</option>
+                                </optgroup>
+                                <optgroup label="USA">
+                                    <option value="AAPL">AAPL - Apple (NYSE)</option>
+                                    <option value="GOOGL">GOOGL - Google (NASDAQ)</option>
+                                    <option value="MSFT">MSFT - Microsoft (NASDAQ)</option>
+                                    <option value="AMZN">AMZN - Amazon (NASDAQ)</option>
+                                    <option value="TSLA">TSLA - Tesla (NASDAQ)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="purchase-date">Fecha de Compra</label>
+                            <input type="date" id="purchase-date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="quantity">Cantidad de Acciones</label>
+                            <input type="number" id="quantity" min="0.01" step="0.01" required placeholder="Ej: 10">
+                        </div>
+                        <div class="form-group">
+                            <label for="price-ars">Precio Total (ARS)</label>
+                            <input type="number" id="price-ars" min="0" step="0.01" required placeholder="Ej: 150000">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="exchange-rate">Cotización USD del día</label>
+                            <input type="number" id="exchange-rate" min="0" step="0.01" required placeholder="Ej: 1200">
+                        </div>
+                        <div class="form-group">
+                            <label>Equivalente en USD</label>
+                            <div id="usd-equivalent" class="calculated-value">$0.00 USD</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-full">
+                        <i class="fas fa-save"></i>
+                        <span>Guardar Compra</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Gráficos -->
+        <section class="charts-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Análisis del Portfolio
+                </h2>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Distribución del Patrimonio</h3>
+                        <div class="chart-container">
+                            <canvas id="portfolio-pie-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Rendimiento por Acción</h3>
+                        <div class="chart-container">
+                            <canvas id="performance-bar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabla de Holdings -->
+        <section class="holdings-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-wallet"></i>
+                    Mis Tenencias
+                </h2>
+                <div class="table-container">
+                    <table id="holdings-table" class="holdings-table">
+                        <thead>
+                            <tr>
+                                <th>Acción</th>
+                                <th>Cantidad</th>
+                                <th>Precio Compra</th>
+                                <th>Valor Actual</th>
+                                <th>Ganancia ARS</th>
+                                <th>Ganancia USD</th>
+                                <th>%</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holdings-body">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-holdings" class="empty-state hidden">
+                    <i class="fas fa-inbox"></i>
+                    <p>No tienes acciones registradas aún</p>
+                    <p class="empty-hint">Agrega tu primera compra arriba</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Historial de Transacciones -->
+        <section class="transactions-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i>
+                    Historial de Compras
+                </h2>
+                <div class="table-container">
+                    <table id="transactions-table" class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Acción</th>
+                                <th>Cantidad</th>
+                                <th>Invertido ARS</th>
+                                <th>USD al momento</th>
+                                <th>Invertido USD</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-body">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calendario -->
+        <section class="calendar-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Calendario de Inversiones
+                </h2>
+                <div class="calendar-controls">
+                    <button id="prev-year" class="btn-icon"><i class="fas fa-chevron-left"></i></button>
+                    <span id="calendar-year" class="calendar-year">2024</span>
+                    <button id="next-year" class="btn-icon"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div id="calendar-grid" class="calendar-grid">
+                    <!-- Se genera dinámicamente -->
+                </div>
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <span class="legend-color low"></span>
+                        <span>Inversión baja</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color medium"></span>
+                        <span>Inversión media</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color high"></span>
+                        <span>Inversión alta</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal detalle día -->
+        <div id="day-detail-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="day-detail-title">Detalle del día</h3>
+                    <button class="modal-close" onclick="closeDayModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="day-detail-content" class="day-detail-content">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Wealth Portfolio © 2024 | Gestiona tu patrimonio con elegancia</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
