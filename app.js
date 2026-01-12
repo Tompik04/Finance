@@ -132,7 +132,7 @@ function switchAuthTab(tab) {
 async function handleLogin(e) {
     e.preventDefault();
     
-    const email = document.getElementById('login-email').value.trim();
+    const user = document.getElementById('login-user').value.trim();
     const password = document.getElementById('login-password').value;
     
     showAuthError('');
@@ -140,21 +140,21 @@ async function handleLogin(e) {
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo
-            const user = DEMO_DATA.users.find(u => u.email === email && u.password === password);
-            if (user) {
-                AppState.user = { email: user.email, name: user.name };
+            const foundUser = DEMO_DATA.users.find(u => u.user === user && u.password === password);
+            if (foundUser) {
+                AppState.user = { user: foundUser.user, name: foundUser.user };
                 localStorage.setItem('wealthPortfolioUser', JSON.stringify(AppState.user));
                 await loginSuccess();
             } else {
-                showAuthError('Email o contraseña incorrectos');
+                showAuthError('Usuario o contraseña incorrectos');
             }
         } else {
             // Llamar al Google Apps Script
-            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=login&user=${encodeURIComponent(user)}&password=${encodeURIComponent(password)}`);
             const data = await response.json();
             
             if (data.success) {
-                AppState.user = { email: data.email, name: data.name };
+                AppState.user = { user: data.user, name: data.user };
                 localStorage.setItem('wealthPortfolioUser', JSON.stringify(AppState.user));
                 await loginSuccess();
             } else {
@@ -170,8 +170,7 @@ async function handleLogin(e) {
 async function handleRegister(e) {
     e.preventDefault();
     
-    const name = document.getElementById('register-name').value.trim();
-    const email = document.getElementById('register-email').value.trim();
+    const user = document.getElementById('register-user').value.trim();
     const password = document.getElementById('register-password').value;
     
     showAuthError('');
@@ -179,22 +178,22 @@ async function handleRegister(e) {
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo - simular registro
-            if (DEMO_DATA.users.find(u => u.email === email)) {
-                showAuthError('Este email ya está registrado');
+            if (DEMO_DATA.users.find(u => u.user === user)) {
+                showAuthError('Este usuario ya existe');
                 return;
             }
-            DEMO_DATA.users.push({ email, password, name });
-            AppState.user = { email, name };
+            DEMO_DATA.users.push({ user, password });
+            AppState.user = { user, name: user };
             localStorage.setItem('wealthPortfolioUser', JSON.stringify(AppState.user));
             await loginSuccess();
             showToast('¡Cuenta creada exitosamente!', 'success');
         } else {
             // Llamar al Google Apps Script
-            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=register&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=register&user=${encodeURIComponent(user)}&password=${encodeURIComponent(password)}`);
             const data = await response.json();
             
             if (data.success) {
-                AppState.user = { email, name };
+                AppState.user = { user, name: user };
                 localStorage.setItem('wealthPortfolioUser', JSON.stringify(AppState.user));
                 await loginSuccess();
                 showToast('¡Cuenta creada exitosamente!', 'success');
@@ -229,7 +228,7 @@ async function loginSuccess() {
     document.getElementById('auth-modal').classList.add('hidden');
     document.getElementById('main-content').classList.remove('hidden');
     document.getElementById('user-info').classList.remove('hidden');
-    document.getElementById('user-name').textContent = AppState.user.name;
+    document.getElementById('user-name').textContent = AppState.user.user || AppState.user.name;
     
     // Cargar datos del usuario
     await loadUserData();

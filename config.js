@@ -25,12 +25,12 @@ const CONFIG = {
 // Datos de ejemplo para modo demo
 const DEMO_DATA = {
     users: [
-        { email: 'demo@demo.com', password: 'demo123', name: 'Usuario Demo' }
+        { user: 'demo', password: 'demo123' }
     ],
     transactions: [
         {
             id: '1',
-            userId: 'demo@demo.com',
+            userId: 'demo',
             ticker: 'GGAL.BA',
             tickerName: 'Grupo Galicia',
             date: '2024-01-15',
