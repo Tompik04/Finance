@@ -10,9 +10,9 @@
     --gold-light: #E5D4A1;
     --gold-dark: #A88B4A;
     
-    /* Tipografía */
-    --font-display: 'Playfair Display', Georgia, serif;
-    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Tipografía - Estilo código */
+    --font-display: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Consolas', monospace;
+    --font-body: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Consolas', monospace;
     
     /* Transiciones */
     --transition-fast: 0.2s ease;
@@ -510,6 +510,12 @@ body::before {
     display: none;
 }
 
+/* Primera sección después del header */
+.add-transaction-section {
+    padding-top: 100px;
+    background: var(--bg-primary);
+}
+
 section {
     padding: 48px 0;
 }
@@ -678,6 +684,17 @@ section {
     color: var(--loss-color);
 }
 
+.ticker-item.loading {
+    opacity: 0.5;
+}
+
+.market-update-time {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 16px;
+}
+
 /* =============================================
    FORMULARIO DE TRANSACCIÓN
    ============================================= */
@@ -837,7 +854,7 @@ section {
 
 .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 16px;
 }
 
@@ -1096,7 +1113,7 @@ section {
     }
     
     .calendar-grid {
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 

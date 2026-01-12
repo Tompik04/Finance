@@ -13,7 +13,16 @@ const AppState = {
     charts: {
         pie: null,
         bar: null
-    }
+    },
+    pricesLoaded: false
+};
+
+// APIs gratuitas para precios (sin necesidad de key)
+const PRICE_APIS = {
+    // Yahoo Finance via AllOrigins proxy (CORS-friendly)
+    yahoo: (symbol) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
+    // Dólar Blue Argentina
+    dolar: 'https://api.bluelytics.com.ar/v2/latest'
 };
 
 // =============================================
@@ -227,6 +236,9 @@ async function loginSuccess() {
     
     // Actualizar interfaz
     updateUI();
+    
+    // Iniciar actualizaciones periódicas de precios
+    startPriceUpdates();
 }
 
 function showAuthError(message) {
@@ -248,8 +260,6 @@ async function loadUserData() {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo
             AppState.transactions = DEMO_DATA.transactions.filter(t => t.userId === AppState.user.email);
-            AppState.currentPrices = DEMO_DATA.currentPrices;
-            AppState.currentUSD = DEMO_DATA.currentUSD;
         } else {
             // Llamar al Google Apps Script
             const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getTransactions&email=${encodeURIComponent(AppState.user.email)}`);
@@ -257,18 +267,133 @@ async function loadUserData() {
             
             if (data.success) {
                 AppState.transactions = data.transactions || [];
-                AppState.currentPrices = data.prices || {};
-                AppState.currentUSD = data.usdRate || 1150;
             }
         }
         
         // Calcular holdings
         calculateHoldings();
         
+        // Obtener precios reales de las acciones
+        await fetchRealPrices();
+        
+        // Obtener cotización del dólar
+        await fetchUSDRate();
+        
     } catch (error) {
         console.error('Error cargando datos:', error);
         showToast('Error al cargar datos', 'error');
     }
+}
+
+// =============================================
+// OBTENER PRECIOS REALES
+// =============================================
+
+async function fetchRealPrices() {
+    const uniqueTickers = new Set();
+    
+    // Agregar tickers de los holdings del usuario
+    Object.keys(AppState.holdings).forEach(ticker => uniqueTickers.add(ticker));
+    
+    // Agregar tickers del mercado
+    CONFIG.MARKET_SYMBOLS.forEach(symbol => {
+        uniqueTickers.add(symbol);
+        uniqueTickers.add(symbol + '.BA');
+    });
+    
+    const promises = [];
+    
+    for (const ticker of uniqueTickers) {
+        promises.push(fetchStockPrice(ticker));
+    }
+    
+    await Promise.allSettled(promises);
+    AppState.pricesLoaded = true;
+    
+    // Actualizar hora de actualización
+    const updateTimeEl = document.getElementById('market-update-time');
+    if (updateTimeEl) {
+        const now = new Date();
+        updateTimeEl.textContent = `Última actualización: ${now.toLocaleTimeString('es-AR')}`;
+    }
+}
+
+async function fetchStockPrice(ticker) {
+    try {
+        // Convertir ticker argentino a formato Yahoo
+        let yahooSymbol = ticker;
+        
+        // Si es un CEDEAR o acción argentina
+        if (ticker.endsWith('.BA')) {
+            yahooSymbol = ticker; // Yahoo usa el mismo formato
+        }
+        
+        const url = PRICE_APIS.yahoo(yahooSymbol);
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error('Network error');
+        
+        const data = await response.json();
+        
+        if (data.chart && data.chart.result && data.chart.result[0]) {
+            const result = data.chart.result[0];
+            const meta = result.meta;
+            const quote = result.indicators?.quote?.[0];
+            
+            const currentPrice = meta.regularMarketPrice || meta.previousClose;
+            const previousClose = meta.previousClose || meta.chartPreviousClose;
+            const change = previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
+            
+            AppState.currentPrices[ticker] = {
+                price: currentPrice,
+                change: change,
+                previousClose: previousClose,
+                currency: meta.currency || 'ARS'
+            };
+            
+            // También guardar sin .BA para acceso fácil
+            if (ticker.endsWith('.BA')) {
+                const shortTicker = ticker.replace('.BA', '');
+                AppState.currentPrices[shortTicker] = AppState.currentPrices[ticker];
+            }
+            
+            return true;
+        }
+    } catch (error) {
+        console.warn(`Error fetching price for ${ticker}:`, error.message);
+        
+        // Usar precio de demo si falla
+        if (DEMO_DATA.currentPrices[ticker]) {
+            AppState.currentPrices[ticker] = DEMO_DATA.currentPrices[ticker];
+        }
+    }
+    return false;
+}
+
+async function fetchUSDRate() {
+    try {
+        const response = await fetch(PRICE_APIS.dolar);
+        const data = await response.json();
+        
+        if (data && data.blue && data.blue.value_sell) {
+            AppState.currentUSD = data.blue.value_sell;
+        } else if (data && data.oficial && data.oficial.value_sell) {
+            AppState.currentUSD = data.oficial.value_sell;
+        }
+    } catch (error) {
+        console.warn('Error fetching USD rate:', error);
+        // Mantener valor por defecto
+        AppState.currentUSD = DEMO_DATA.currentUSD || 1150;
+    }
+}
+
+// Actualizar precios cada 5 minutos
+function startPriceUpdates() {
+    setInterval(async () => {
+        await fetchRealPrices();
+        await fetchUSDRate();
+        updateUI();
+    }, 5 * 60 * 1000);
 }
 
 function calculateHoldings() {
@@ -411,8 +536,15 @@ function updateSummary() {
     let totalInvestedARS = 0;
     
     Object.values(AppState.holdings).forEach(holding => {
-        const currentPrice = AppState.currentPrices[holding.ticker]?.price || holding.avgPricePerShare;
-        const currentValue = holding.quantity * currentPrice;
+        // Obtener precio actual
+        const priceData = AppState.currentPrices[holding.ticker] || 
+                         AppState.currentPrices[holding.ticker.replace('.BA', '')] ||
+                         null;
+        
+        const pricePerShareAtPurchase = holding.totalInvestedARS / holding.quantity;
+        const currentPricePerShare = priceData ? priceData.price : pricePerShareAtPurchase;
+        
+        const currentValue = holding.quantity * currentPricePerShare;
         totalValueARS += currentValue;
         totalInvestedARS += holding.totalInvestedARS;
     });
@@ -441,15 +573,22 @@ function updateMarketTicker() {
     ticker.innerHTML = '';
     
     CONFIG.MARKET_SYMBOLS.forEach(symbol => {
-        const priceData = AppState.currentPrices[symbol + '.BA'] || AppState.currentPrices[symbol] || { price: 0, change: 0 };
+        // Buscar precio con diferentes formatos
+        const priceData = AppState.currentPrices[symbol + '.BA'] || 
+                         AppState.currentPrices[symbol] || 
+                         { price: 0, change: 0 };
         
         const item = document.createElement('div');
         item.className = 'ticker-item';
+        
+        const price = priceData.price || 0;
+        const change = priceData.change || 0;
+        
         item.innerHTML = `
             <span class="ticker-symbol">${symbol}</span>
-            <span class="ticker-price">${formatCurrency(priceData.price, 'ARS')}</span>
-            <span class="ticker-change ${priceData.change >= 0 ? 'positive' : 'negative'}">
-                ${priceData.change >= 0 ? '+' : ''}${priceData.change.toFixed(2)}%
+            <span class="ticker-price">${price > 0 ? formatCurrency(price, 'ARS') : 'Cargando...'}</span>
+            <span class="ticker-change ${change >= 0 ? 'positive' : 'negative'}">
+                ${change !== 0 ? (change >= 0 ? '+' : '') + change.toFixed(2) + '%' : '--'}
             </span>
         `;
         ticker.appendChild(item);
@@ -471,11 +610,22 @@ function updateHoldingsTable() {
     tbody.innerHTML = '';
     
     holdings.forEach(holding => {
-        const currentPrice = AppState.currentPrices[holding.ticker]?.price || holding.avgPricePerShare;
-        const currentValueARS = holding.quantity * currentPrice;
+        // Obtener precio actual de la acción
+        const priceData = AppState.currentPrices[holding.ticker] || 
+                         AppState.currentPrices[holding.ticker.replace('.BA', '')] ||
+                         null;
+        
+        // Si no hay precio actual, usar el precio promedio de compra por acción
+        const pricePerShareAtPurchase = holding.totalInvestedARS / holding.quantity;
+        const currentPricePerShare = priceData ? priceData.price : pricePerShareAtPurchase;
+        
+        // Calcular valor actual total
+        const currentValueARS = holding.quantity * currentPricePerShare;
+        
+        // Calcular ganancia/pérdida
         const profitARS = currentValueARS - holding.totalInvestedARS;
         const profitUSD = profitARS / AppState.currentUSD;
-        const profitPercent = (profitARS / holding.totalInvestedARS) * 100;
+        const profitPercent = holding.totalInvestedARS > 0 ? (profitARS / holding.totalInvestedARS) * 100 : 0;
         
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -485,7 +635,10 @@ function updateHoldingsTable() {
             </td>
             <td>${holding.quantity.toFixed(2)}</td>
             <td>${formatCurrency(holding.totalInvestedARS, 'ARS')}</td>
-            <td>${formatCurrency(currentValueARS, 'ARS')}</td>
+            <td>
+                ${formatCurrency(currentValueARS, 'ARS')}
+                ${priceData ? '' : '<br><small style="color: var(--text-tertiary)">(sin cotización)</small>'}
+            </td>
             <td class="${profitARS >= 0 ? 'text-profit' : 'text-loss'}">
                 ${profitARS >= 0 ? '+' : ''}${formatCurrency(profitARS, 'ARS')}
             </td>
@@ -558,8 +711,11 @@ function updatePieChart() {
     }
     
     const data = holdings.map(h => {
-        const currentPrice = AppState.currentPrices[h.ticker]?.price || h.avgPricePerShare;
-        return h.quantity * currentPrice;
+        const priceData = AppState.currentPrices[h.ticker] || 
+                         AppState.currentPrices[h.ticker.replace('.BA', '')] ||
+                         null;
+        const pricePerShare = priceData ? priceData.price : (h.totalInvestedARS / h.quantity);
+        return h.quantity * pricePerShare;
     });
     
     const labels = holdings.map(h => h.ticker.replace('.BA', ''));
@@ -589,7 +745,7 @@ function updatePieChart() {
                         color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
                         padding: 16,
                         font: {
-                            family: 'Inter'
+                            family: 'JetBrains Mono, monospace'
                         }
                     }
                 },
@@ -622,17 +778,20 @@ function updateBarChart() {
     }
     
     const data = holdings.map(h => {
-        const currentPrice = AppState.currentPrices[h.ticker]?.price || h.avgPricePerShare;
-        const currentValue = h.quantity * currentPrice;
+        const priceData = AppState.currentPrices[h.ticker] || 
+                         AppState.currentPrices[h.ticker.replace('.BA', '')] ||
+                         null;
+        const pricePerShare = priceData ? priceData.price : (h.totalInvestedARS / h.quantity);
+        const currentValue = h.quantity * pricePerShare;
         const profit = currentValue - h.totalInvestedARS;
-        return (profit / h.totalInvestedARS) * 100;
+        return h.totalInvestedARS > 0 ? (profit / h.totalInvestedARS) * 100 : 0;
     });
     
     const labels = holdings.map(h => h.ticker.replace('.BA', ''));
     
     const colors = data.map(d => d >= 0 ? 
-        getComputedStyle(document.body).getPropertyValue('--profit-color') : 
-        getComputedStyle(document.body).getPropertyValue('--loss-color')
+        getComputedStyle(document.body).getPropertyValue('--profit-color').trim() : 
+        getComputedStyle(document.body).getPropertyValue('--loss-color').trim()
     );
     
     AppState.charts.bar = new Chart(ctx, {
@@ -670,6 +829,9 @@ function updateBarChart() {
                         color: getComputedStyle(document.body).getPropertyValue('--text-secondary'),
                         callback: function(value) {
                             return value + '%';
+                        },
+                        font: {
+                            family: 'JetBrains Mono, monospace'
                         }
                     }
                 },
@@ -678,7 +840,10 @@ function updateBarChart() {
                         display: false
                     },
                     ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-secondary')
+                        color: getComputedStyle(document.body).getPropertyValue('--text-secondary'),
+                        font: {
+                            family: 'JetBrains Mono, monospace'
+                        }
                     }
                 }
             }

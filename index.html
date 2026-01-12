@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wealth Portfolio | Tu Patrimonio</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -95,53 +95,8 @@
 
     <!-- Contenido Principal (Solo visible después de login) -->
     <main id="main-content" class="main-content hidden">
-        <!-- Hero Section con resumen -->
-        <section class="hero-section">
-            <div class="container">
-                <div class="portfolio-summary">
-                    <div class="summary-card main-value">
-                        <span class="summary-label">Patrimonio Total</span>
-                        <span id="total-value-ars" class="summary-value">$0</span>
-                        <span id="total-value-usd" class="summary-secondary">USD $0</span>
-                    </div>
-                    <div class="summary-cards-row">
-                        <div class="summary-card">
-                            <span class="summary-label">Inversión Total</span>
-                            <span id="total-invested" class="summary-value small">$0</span>
-                        </div>
-                        <div class="summary-card">
-                            <span class="summary-label">Ganancia/Pérdida</span>
-                            <span id="total-profit" class="summary-value small profit">$0</span>
-                            <span id="total-profit-percent" class="summary-percent">0%</span>
-                        </div>
-                        <div class="summary-card">
-                            <span class="summary-label">Cotización USD</span>
-                            <span id="current-usd" class="summary-value small">$0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Sección de Acciones Populares (visible sin login también) -->
-        <section class="market-section">
-            <div class="container">
-                <h2 class="section-title">
-                    <i class="fas fa-chart-line"></i>
-                    Mercado Hoy
-                </h2>
-                <div id="market-ticker" class="market-ticker">
-                    <div class="ticker-item">
-                        <span class="ticker-symbol">AAPL</span>
-                        <span class="ticker-price">--</span>
-                        <span class="ticker-change">--</span>
-                    </div>
-                    <!-- Se llena dinámicamente -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Agregar Transacción -->
+        
+        <!-- Agregar Transacción - PRIMERO -->
         <section class="add-transaction-section">
             <div class="container">
                 <div class="section-header">
@@ -236,6 +191,50 @@
                         <span>Guardar Compra</span>
                     </button>
                 </form>
+            </div>
+        </section>
+
+        <!-- Hero Section con resumen -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="portfolio-summary">
+                    <div class="summary-card main-value">
+                        <span class="summary-label">Patrimonio Total</span>
+                        <span id="total-value-ars" class="summary-value">$0</span>
+                        <span id="total-value-usd" class="summary-secondary">USD $0</span>
+                    </div>
+                    <div class="summary-cards-row">
+                        <div class="summary-card">
+                            <span class="summary-label">Inversión Total</span>
+                            <span id="total-invested" class="summary-value small">$0</span>
+                        </div>
+                        <div class="summary-card">
+                            <span class="summary-label">Ganancia/Pérdida</span>
+                            <span id="total-profit" class="summary-value small profit">$0</span>
+                            <span id="total-profit-percent" class="summary-percent">0%</span>
+                        </div>
+                        <div class="summary-card">
+                            <span class="summary-label">Cotización USD</span>
+                            <span id="current-usd" class="summary-value small">$0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Acciones Populares -->
+        <section class="market-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Mercado Hoy
+                </h2>
+                <div id="market-ticker" class="market-ticker">
+                    <div class="ticker-item loading">
+                        <span class="ticker-symbol">Cargando...</span>
+                    </div>
+                </div>
+                <p id="market-update-time" class="market-update-time"></p>
             </div>
         </section>
 

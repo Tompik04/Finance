@@ -7,7 +7,7 @@
 const CONFIG = {
     // URL del Google Apps Script (Web App)
     // Ejemplo: 'https://script.google.com/macros/s/AKfycbx.../exec'
-    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwUYBPeo1VDgV-rk4VKy5W60rozGWX56MqU7aGCCMfuezPhAyjWW5tHWXFzQdu2rq_eew/exec',
+    GOOGLE_SCRIPT_URL: 'TU_URL_DEL_SCRIPT_AQUI',
     
     // Símbolos para mostrar en el ticker del mercado
     MARKET_SYMBOLS: ['GGAL', 'YPF', 'AAPL', 'GOOGL', 'MSFT', 'MELI'],
@@ -62,14 +62,25 @@ const DEMO_DATA = {
             priceUSD: 315.79
         }
     ],
-    // Precios simulados actuales
+    // Precios de respaldo si las APIs fallan
     currentPrices: {
-        'GGAL.BA': { price: 1800, change: 2.5 },
-        'YPF.BA': { price: 4500, change: -1.2 },
-        'AAPL.BA': { price: 15000, change: 0.8 },
-        'GOOGL.BA': { price: 12000, change: 1.5 },
-        'MSFT.BA': { price: 14000, change: 0.3 },
-        'MELI.BA': { price: 50000, change: 3.2 }
+        'GGAL.BA': { price: 2150, change: 3.2 },
+        'GGAL': { price: 2150, change: 3.2 },
+        'YPF.BA': { price: 5200, change: -0.8 },
+        'YPF': { price: 5200, change: -0.8 },
+        'AAPL.BA': { price: 18500, change: 1.5 },
+        'AAPL': { price: 18500, change: 1.5 },
+        'GOOGL.BA': { price: 14200, change: 0.9 },
+        'GOOGL': { price: 14200, change: 0.9 },
+        'MSFT.BA': { price: 16800, change: 1.2 },
+        'MSFT': { price: 16800, change: 1.2 },
+        'MELI.BA': { price: 62000, change: 2.1 },
+        'MELI': { price: 62000, change: 2.1 },
+        'PAMP.BA': { price: 3400, change: -0.5 },
+        'TXAR.BA': { price: 1850, change: 0.3 },
+        'ALUA.BA': { price: 980, change: 1.1 },
+        'BBAR.BA': { price: 1320, change: 2.4 },
+        'BMA.BA': { price: 4100, change: 1.8 }
     },
-    currentUSD: 1150
+    currentUSD: 1200
 };
