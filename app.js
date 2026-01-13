@@ -8,7 +8,7 @@ const AppState = {
     transactions: [],
     holdings: {},
     currentPrices: {},
-    currentUSD: 1150,
+    currentUSD: 1500,
     calendarYear: new Date().getFullYear(),
     charts: {
         pie: null,
@@ -228,7 +228,7 @@ async function loginSuccess() {
     document.getElementById('auth-modal').classList.add('hidden');
     document.getElementById('main-content').classList.remove('hidden');
     document.getElementById('user-info').classList.remove('hidden');
-    document.getElementById('user-name').textContent = AppState.user || AppState.user.name;
+    document.getElementById('user-name').textContent = AppState.user.user || AppState.user.name;
     
     // Cargar datos del usuario
     await loadUserData();
@@ -258,10 +258,15 @@ async function loadUserData() {
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo
-            AppState.transactions = DEMO_DATA.transactions.filter(t => t.userId === AppState.user);
+            AppState.transactions = DEMO_DATA.transactions.filter(t => t.userId === AppState.user.user);
         } else {
+            console.log('AppState.user---------------------------------------')
+            console.log(AppState.user)
+            console.log(AppState.user.user)
+            console.log(AppState.user.name)
+            console.log(AppState.user.id)
             // Llamar al Google Apps Script
-            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getTransactions&user=${encodeURIComponent(AppState.user)}`);
+            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getTransactions&user=${encodeURIComponent(AppState.user.user)}`);
             const data = await response.json();
             
             if (data.success) {
@@ -437,7 +442,7 @@ async function handleAddTransaction(e) {
     
     const transaction = {
         id: Date.now().toString(),
-        userId: AppState.user,
+        userId: AppState.user.user,
         ticker,
         tickerName,
         date,
@@ -496,7 +501,7 @@ async function deleteTransaction(transactionId) {
             if (stateIndex > -1) AppState.transactions.splice(stateIndex, 1);
         } else {
             // Eliminar de Google Sheets
-            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=deleteTransaction&id=${transactionId}&user=${encodeURIComponent(AppState.user)}`);
+            const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=deleteTransaction&id=${transactionId}&user=${encodeURIComponent(AppState.user.user)}`);
             const data = await response.json();
             
             if (data.success) {
