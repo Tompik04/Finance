@@ -138,7 +138,7 @@ async function handleLogin(e) {
     showAuthError('');
     
     try {
-        if (CONFIG.DEMO_MODE) {
+        if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo
             const foundUser = DEMO_DATA.users.find(u => u.user === user && u.password === password);
             if (foundUser) {
@@ -176,7 +176,7 @@ async function handleRegister(e) {
     showAuthError('');
     
     try {
-        if (CONFIG.DEMO_MODE) {
+        if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo - simular registro
             if (DEMO_DATA.users.find(u => u.user === user)) {
                 showAuthError('Este usuario ya existe');
@@ -256,7 +256,7 @@ function showAuthError(message) {
 
 async function loadUserData() {
     try {
-        if (CONFIG.DEMO_MODE) {
+        if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo
             AppState.transactions = DEMO_DATA.transactions.filter(t => t.userId === AppState.user.user);
         } else {
@@ -448,7 +448,7 @@ async function handleAddTransaction(e) {
     };
     
     try {
-        if (CONFIG.DEMO_MODE) {
+        if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo
             DEMO_DATA.transactions.push(transaction);
             AppState.transactions.push(transaction);
@@ -487,7 +487,7 @@ async function deleteTransaction(transactionId) {
     if (!confirm('¿Estás seguro de eliminar esta transacción?')) return;
     
     try {
-        if (CONFIG.DEMO_MODE) {
+        if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
             // Modo demo
             const index = DEMO_DATA.transactions.findIndex(t => t.id === transactionId);
             if (index > -1) DEMO_DATA.transactions.splice(index, 1);
