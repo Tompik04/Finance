@@ -496,6 +496,15 @@ body::before {
     font-size: 15px;
     font-weight: 600;
     color: var(--gold);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.calculated-usd {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 /* =============================================
