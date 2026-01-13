@@ -261,10 +261,7 @@ async function loadUserData() {
             AppState.transactions = DEMO_DATA.transactions.filter(t => t.userId === AppState.user.user);
         } else {
             console.log('AppState.user---------------------------------------')
-            console.log(AppState.user)
-            console.log(AppState.user.user)
-            console.log(AppState.user.name)
-            console.log(AppState.user.id)
+            
             // Llamar al Google Apps Script
             const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getTransactions&user=${encodeURIComponent(AppState.user.user)}`);
             const data = await response.json();
