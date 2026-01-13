@@ -78,9 +78,10 @@ function setupEventListeners() {
     // Formulario de transacción
     document.getElementById('transaction-form').addEventListener('submit', handleAddTransaction);
     
-    // Cálculo automático USD
-    document.getElementById('price-ars').addEventListener('input', calculateUSD);
-    document.getElementById('exchange-rate').addEventListener('input', calculateUSD);
+    // Cálculo automático del total
+    document.getElementById('quantity').addEventListener('input', calculateTotal);
+    document.getElementById('price-per-share').addEventListener('input', calculateTotal);
+    document.getElementById('exchange-rate').addEventListener('input', calculateTotal);
     
     // Navegación del calendario
     document.getElementById('prev-year').addEventListener('click', () => changeCalendarYear(-1));
@@ -431,7 +432,8 @@ async function handleAddTransaction(e) {
     const tickerName = document.getElementById('stock-select').options[document.getElementById('stock-select').selectedIndex].text.split(' - ')[1];
     const date = document.getElementById('purchase-date').value;
     const quantity = parseFloat(document.getElementById('quantity').value);
-    const priceARS = parseFloat(document.getElementById('price-ars').value);
+    const pricePerShare = parseFloat(document.getElementById('price-per-share').value);
+    const priceARS = quantity * pricePerShare;  // Calcular el total
     const exchangeRate = parseFloat(document.getElementById('exchange-rate').value);
     const priceUSD = priceARS / exchangeRate;
     
@@ -473,7 +475,8 @@ async function handleAddTransaction(e) {
         
         // Limpiar formulario
         document.getElementById('transaction-form').reset();
-        document.getElementById('usd-equivalent').textContent = '$0.00 USD';
+        document.getElementById('total-ars').textContent = '$0 ARS';
+        document.getElementById('total-usd-calc').textContent = '≈ $0.00 USD';
         
         showToast('Compra registrada exitosamente', 'success');
         
@@ -533,6 +536,7 @@ function updateUI() {
 function updateSummary() {
     let totalValueARS = 0;
     let totalInvestedARS = 0;
+    let totalInvestedUSD = 0;
     
     Object.values(AppState.holdings).forEach(holding => {
         // Obtener precio actual
@@ -546,6 +550,7 @@ function updateSummary() {
         const currentValue = holding.quantity * currentPricePerShare;
         totalValueARS += currentValue;
         totalInvestedARS += holding.totalInvestedARS;
+        totalInvestedUSD += holding.totalInvestedUSD;  // Sumar USD invertidos
     });
     
     const totalValueUSD = totalValueARS / AppState.currentUSD;
@@ -555,6 +560,7 @@ function updateSummary() {
     document.getElementById('total-value-ars').textContent = formatCurrency(totalValueARS, 'ARS');
     document.getElementById('total-value-usd').textContent = `USD ${formatCurrency(totalValueUSD, 'USD')}`;
     document.getElementById('total-invested').textContent = formatCurrency(totalInvestedARS, 'ARS');
+    document.getElementById('total-invested-usd').textContent = `USD ${formatCurrency(totalInvestedUSD, 'USD')}`;
     
     const profitEl = document.getElementById('total-profit');
     profitEl.textContent = formatCurrency(totalProfit, 'ARS');
@@ -991,12 +997,16 @@ function toggleTransactionForm() {
     icon.classList.toggle('fa-chevron-up');
 }
 
-function calculateUSD() {
-    const priceARS = parseFloat(document.getElementById('price-ars').value) || 0;
+function calculateTotal() {
+    const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+    const pricePerShare = parseFloat(document.getElementById('price-per-share').value) || 0;
     const exchangeRate = parseFloat(document.getElementById('exchange-rate').value) || 1;
-    const usdValue = exchangeRate > 0 ? priceARS / exchangeRate : 0;
     
-    document.getElementById('usd-equivalent').textContent = `$${usdValue.toFixed(2)} USD`;
+    const totalARS = quantity * pricePerShare;
+    const totalUSD = exchangeRate > 0 ? totalARS / exchangeRate : 0;
+    
+    document.getElementById('total-ars').textContent = formatCurrency(totalARS, 'ARS');
+    document.getElementById('total-usd-calc').textContent = `≈ ${formatCurrency(totalUSD, 'USD')}`;
 }
 
 function formatCurrency(value, currency) {
