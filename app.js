@@ -1025,12 +1025,50 @@ function formatCurrency(value, currency) {
 }
 
 function formatDate(dateStr) {
-    const date = new Date(dateStr + 'T00:00:00');
-    return new Intl.DateTimeFormat('es-AR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-    }).format(date);
+    if (!dateStr) return 'Sin fecha';
+    
+    try {
+        let date;
+        
+        // Si es un objeto Date de Google Sheets (viene como string con formato diferente)
+        if (typeof dateStr === 'object' && dateStr instanceof Date) {
+            date = dateStr;
+        } else if (typeof dateStr === 'string') {
+            // Si viene en formato YYYY-MM-DD
+            if (dateStr.includes('-') && dateStr.length === 10) {
+                const parts = dateStr.split('-');
+                date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            } 
+            // Si viene en formato con T (ISO)
+            else if (dateStr.includes('T')) {
+                date = new Date(dateStr);
+            }
+            // Si viene en otro formato (como de Google Sheets)
+            else {
+                date = new Date(dateStr);
+            }
+        } else if (typeof dateStr === 'number') {
+            // Si viene como timestamp
+            date = new Date(dateStr);
+        } else {
+            return String(dateStr);
+        }
+        
+        // Verificar si la fecha es válida
+        if (isNaN(date.getTime())) {
+            console.warn('Fecha inválida:', dateStr);
+            return String(dateStr);
+        }
+        
+        return new Intl.DateTimeFormat('es-AR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }).format(date);
+    } catch (e) {
+        console.warn('Error parsing date:', dateStr, e);
+        return String(dateStr);
+    }
 }
 
 function showToast(message, type = 'info') {
