@@ -19,8 +19,12 @@ const AppState = {
 
 // APIs gratuitas para precios (sin necesidad de key)
 const PRICE_APIS = {
-    // Yahoo Finance via AllOrigins proxy (CORS-friendly)
-    yahoo: (symbol) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
+    // Proxies alternativos para Yahoo Finance
+    proxies: [
+        (symbol) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
+        (symbol) => `https://corsproxy.io/?${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
+        (symbol) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`
+    ],
     // Dólar Blue Argentina
     dolar: 'https://api.bluelytics.com.ar/v2/latest'
 };
@@ -319,53 +323,56 @@ async function fetchRealPrices() {
 }
 
 async function fetchStockPrice(ticker) {
-    try {
-        // Convertir ticker argentino a formato Yahoo
-        let yahooSymbol = ticker;
-        
-        // Si es un CEDEAR o acción argentina
-        if (ticker.endsWith('.BA')) {
-            yahooSymbol = ticker; // Yahoo usa el mismo formato
-        }
-        
-        const url = PRICE_APIS.yahoo(yahooSymbol);
-        const response = await fetch(url);
-        
-        if (!response.ok) throw new Error('Network error');
-        
-        const data = await response.json();
-        
-        if (data.chart && data.chart.result && data.chart.result[0]) {
-            const result = data.chart.result[0];
-            const meta = result.meta;
-            const quote = result.indicators?.quote?.[0];
+    // Convertir ticker argentino a formato Yahoo
+    let yahooSymbol = ticker;
+    
+    // Si es un CEDEAR o acción argentina
+    if (ticker.endsWith('.BA')) {
+        yahooSymbol = ticker;
+    }
+    
+    // Intentar con cada proxy hasta que uno funcione
+    for (const proxyFn of PRICE_APIS.proxies) {
+        try {
+            const url = proxyFn(yahooSymbol);
+            const response = await fetch(url, { timeout: 5000 });
             
-            const currentPrice = meta.regularMarketPrice || meta.previousClose;
-            const previousClose = meta.previousClose || meta.chartPreviousClose;
-            const change = previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
+            if (!response.ok) continue;
             
-            AppState.currentPrices[ticker] = {
-                price: currentPrice,
-                change: change,
-                previousClose: previousClose,
-                currency: meta.currency || 'ARS'
-            };
+            const data = await response.json();
             
-            // También guardar sin .BA para acceso fácil
-            if (ticker.endsWith('.BA')) {
-                const shortTicker = ticker.replace('.BA', '');
-                AppState.currentPrices[shortTicker] = AppState.currentPrices[ticker];
+            if (data.chart && data.chart.result && data.chart.result[0]) {
+                const result = data.chart.result[0];
+                const meta = result.meta;
+                
+                const currentPrice = meta.regularMarketPrice || meta.previousClose;
+                const previousClose = meta.previousClose || meta.chartPreviousClose;
+                const change = previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
+                
+                AppState.currentPrices[ticker] = {
+                    price: currentPrice,
+                    change: change,
+                    previousClose: previousClose,
+                    currency: meta.currency || 'ARS'
+                };
+                
+                if (ticker.endsWith('.BA')) {
+                    const shortTicker = ticker.replace('.BA', '');
+                    AppState.currentPrices[shortTicker] = AppState.currentPrices[ticker];
+                }
+                
+                return true;
             }
-            
-            return true;
+        } catch (error) {
+            // Continuar con el siguiente proxy
+            continue;
         }
-    } catch (error) {
-        console.warn(`Error fetching price for ${ticker}:`, error.message);
-        
-        // Usar precio de demo si falla
-        if (DEMO_DATA.currentPrices[ticker]) {
-            AppState.currentPrices[ticker] = DEMO_DATA.currentPrices[ticker];
-        }
+    }
+    
+    // Si todos los proxies fallan, usar precio de demo
+    console.warn(`No se pudo obtener precio para ${ticker}, usando fallback`);
+    if (DEMO_DATA.currentPrices[ticker]) {
+        AppState.currentPrices[ticker] = DEMO_DATA.currentPrices[ticker];
     }
     return false;
 }
