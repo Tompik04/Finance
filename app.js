@@ -47,6 +47,9 @@ async function initApp() {
     // Configurar fecha máxima en el input
     document.getElementById('purchase-date').max = new Date().toISOString().split('T')[0];
     
+    // Inicializar Tom Select para búsqueda de acciones
+    initStockSelector();
+    
     // Verificar si hay sesión guardada
     const savedUser = localStorage.getItem('wealthPortfolioUser');
     if (savedUser) {
@@ -90,6 +93,42 @@ function setupEventListeners() {
     // Navegación del calendario
     document.getElementById('prev-year').addEventListener('click', () => changeCalendarYear(-1));
     document.getElementById('next-year').addEventListener('click', () => changeCalendarYear(1));
+}
+
+// =============================================
+// SELECTOR DE ACCIONES CON BÚSQUEDA
+// =============================================
+
+function initStockSelector() {
+    const stockSelect = document.getElementById('stock-select');
+    
+    if (stockSelect && !stockSelect.tomselect) {
+        new TomSelect('#stock-select', {
+            placeholder: 'Buscar acción...',
+            searchField: ['text', 'value'],
+            sortField: {
+                field: 'text',
+                direction: 'asc'
+            },
+            render: {
+                option: function(data, escape) {
+                    return `<div class="option">${escape(data.text)}</div>`;
+                },
+                item: function(data, escape) {
+                    return `<div class="item">${escape(data.text)}</div>`;
+                },
+                optgroup_header: function(data, escape) {
+                    return `<div class="optgroup-header">${escape(data.label)}</div>`;
+                },
+                no_results: function(data, escape) {
+                    return `<div class="no-results">No se encontró "${escape(data.input)}"</div>`;
+                }
+            },
+            maxOptions: 200,
+            openOnFocus: true,
+            highlight: true
+        });
+    }
 }
 
 // =============================================
@@ -234,6 +273,9 @@ async function loginSuccess() {
     document.getElementById('main-content').classList.remove('hidden');
     document.getElementById('user-info').classList.remove('hidden');
     document.getElementById('user-name').textContent = AppState.user.user || AppState.user.name;
+    
+    // Reinicializar selector de acciones si es necesario
+    setTimeout(() => initStockSelector(), 100);
     
     // Cargar datos del usuario
     await loadUserData();
