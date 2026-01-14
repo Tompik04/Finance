@@ -182,6 +182,117 @@ body::before {
 }
 
 /* =============================================
+   TOM SELECT - BÚSQUEDA DE ACCIONES
+   ============================================= */
+
+.ts-wrapper {
+    font-family: var(--font-body);
+}
+
+.ts-wrapper.single .ts-control {
+    padding: 14px 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.ts-wrapper.single .ts-control:hover {
+    border-color: var(--gold);
+}
+
+.ts-wrapper.single.focus .ts-control {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
+}
+
+.ts-wrapper .ts-control input {
+    color: var(--text-primary);
+    font-family: var(--font-body);
+}
+
+.ts-wrapper .ts-control input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.ts-dropdown {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    margin-top: 4px;
+}
+
+.ts-dropdown .optgroup-header {
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ts-dropdown .option {
+    padding: 12px 16px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.ts-dropdown .option:hover,
+.ts-dropdown .option.active {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.ts-dropdown .option.selected {
+    background: rgba(201, 169, 98, 0.15);
+    color: var(--gold);
+}
+
+.ts-dropdown .option .highlight {
+    background: rgba(201, 169, 98, 0.3);
+    border-radius: 2px;
+}
+
+/* Tema oscuro ajustes */
+.theme-dark .ts-wrapper.single .ts-control {
+    background: var(--input-bg);
+    border-color: var(--input-border);
+}
+
+.theme-dark .ts-dropdown {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.theme-dark .ts-dropdown .optgroup-header {
+    background: var(--bg-tertiary);
+}
+
+/* Placeholder */
+.ts-wrapper.single .ts-control .item {
+    color: var(--text-primary);
+}
+
+.ts-wrapper.single .ts-control::after {
+    border-color: var(--text-secondary) transparent transparent transparent;
+}
+
+/* No results */
+.ts-dropdown .no-results {
+    padding: 16px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 14px;
+}
+
+/* =============================================
    HEADER
    ============================================= */
 
