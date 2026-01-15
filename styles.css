@@ -185,6 +185,12 @@ body::before {
    TOM SELECT - BÚSQUEDA DE ACCIONES
    ============================================= */
 
+
+.ts-control, .ts-wrapper.single.input-active .ts-control {
+    background: #141419;
+    cursor: text;
+}
+
 .ts-wrapper {
     font-family: var(--font-body);
 }
