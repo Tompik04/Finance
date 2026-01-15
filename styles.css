@@ -260,10 +260,25 @@ body::before {
     border-radius: 2px;
 }
 
-/* Tema oscuro ajustes */
+/* Tema oscuro */
 .theme-dark .ts-wrapper.single .ts-control {
     background: var(--input-bg);
     border-color: var(--input-border);
+}
+
+.theme-dark .ts-wrapper.single .ts-control > input {
+    color: var(--text-primary) !important;
+    background: transparent !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.theme-dark .ts-wrapper.single .ts-control > input::placeholder {
+    color: var(--text-tertiary) !important;
+    -webkit-text-fill-color: var(--text-tertiary) !important;
+}
+
+.theme-dark .ts-wrapper.single .ts-control .item {
+    color: var(--text-primary);
 }
 
 .theme-dark .ts-dropdown {
@@ -272,7 +287,23 @@ body::before {
 }
 
 .theme-dark .ts-dropdown .optgroup-header {
-    background: var(--bg-tertiary);
+    background: var(--bg-primary);
+}
+
+.theme-dark .ts-dropdown .option {
+    color: var(--text-primary);
+}
+
+.theme-dark .ts-dropdown .option .option-name {
+    color: var(--text-secondary);
+}
+
+/* Forzar colores en el input para ambos temas */
+.ts-wrapper .ts-control input[type="text"] {
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    caret-color: var(--gold) !important;
 }
 
 /* Placeholder */
