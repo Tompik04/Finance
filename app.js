@@ -687,12 +687,12 @@ function updateSummary() {
     percentEl.className = `summary-percent ${totalProfit >= 0 ? 'profit' : 'loss'}`;
 
     const profitElUSD = document.getElementById('total-profit-usd');
-    profitEl.textContent = formatCurrency(totalProfitUSD, 'ARS');
-    profitEl.className = `summary-value small ${totalProfitUSD >= 0 ? 'profit' : 'loss'}`;
+    profitElUSD.textContent = formatCurrency(totalProfitUSD, 'USD');
+    profitElUSD.className = `summary-value small ${totalProfitUSD >= 0 ? 'profit' : 'loss'}`;
     
     const percentElUSD = document.getElementById('total-profit-percent-usd');
-    percentEl.textContent = `${totalProfitUSD >= 0 ? '+' : ''}${profitPercentUSD.toFixed(2)}%`;
-    percentEl.className = `summary-percent ${totalProfitUSD >= 0 ? 'profit' : 'loss'}`;
+    percentElUSD.textContent = `${totalProfitUSD >= 0 ? '+' : ''}${profitPercentUSD.toFixed(2)}%`;
+    percentElUSD.className = `summary-percent ${totalProfitUSD >= 0 ? 'profit' : 'loss'}`;
     
     document.getElementById('current-usd').textContent = formatCurrency(AppState.currentUSD, 'ARS');
 }
