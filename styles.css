@@ -215,7 +215,6 @@ body::before {
 }
 
 .ts-wrapper .ts-control input {
-    color: var(--text-primary);
     font-family: var(--font-body);
 }
 
