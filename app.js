@@ -739,6 +739,11 @@ function updateSummary() {
     
     // Usar dólar blue para los cálculos generales
     const currentUSDBlue = AppState.currentUSD.blue || 1200;
+
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    console.log(AppState.currentUSD.oficial)
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    console.log(AppState.currentUSD.blue)
     
     Object.values(AppState.holdings).forEach(holding => {
         const priceData = AppState.currentPrices[holding.ticker] || 
