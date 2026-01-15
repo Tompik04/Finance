@@ -185,130 +185,213 @@ body::before {
    TOM SELECT - BÚSQUEDA DE ACCIONES
    ============================================= */
 
-
-.ts-control, .ts-wrapper.single.input-active .ts-control {
-    background: #141419;
-    cursor: text;
-}
-
 .ts-wrapper {
     font-family: var(--font-body);
 }
 
-.ts-wrapper.single .ts-control {
-    padding: 14px 16px;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: var(--radius-sm);
-    font-size: 15px;
-    color: var(--text-primary);
-    cursor: pointer;
+/* Control principal */
+.ts-wrapper.single .ts-control,
+.ts-control,
+.ts-wrapper.single.input-active .ts-control {
+    padding: 14px 16px !important;
+    background: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 15px !important;
+    color: var(--text-primary) !important;
+    cursor: text !important;
 }
 
 .ts-wrapper.single .ts-control:hover {
-    border-color: var(--gold);
+    border-color: var(--gold) !important;
 }
 
 .ts-wrapper.single.focus .ts-control {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15) !important;
 }
 
-.ts-wrapper .ts-control input {
-    font-family: var(--font-body);
+/* Input de búsqueda - FORZAR VISIBILIDAD */
+.ts-wrapper .ts-control input,
+.ts-wrapper .ts-control > input,
+.ts-wrapper.single .ts-control input,
+.ts-wrapper.single .ts-control > input,
+.ts-control input,
+.ts-control > input {
+    color: var(--text-primary) !important;
+    background: transparent !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    opacity: 1 !important;
+    font-family: var(--font-body) !important;
+    font-size: 15px !important;
+    caret-color: var(--gold) !important;
 }
 
-.ts-wrapper .ts-control input::placeholder {
-    color: var(--text-tertiary);
+.ts-wrapper .ts-control input::placeholder,
+.ts-control input::placeholder {
+    color: var(--text-tertiary) !important;
+    -webkit-text-fill-color: var(--text-tertiary) !important;
+    opacity: 1 !important;
 }
 
+/* Item seleccionado */
+.ts-wrapper.single .ts-control .item {
+    color: var(--text-primary) !important;
+    background: transparent !important;
+}
+
+/* Dropdown */
 .ts-dropdown {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-lg);
-    margin-top: 4px;
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: var(--shadow-lg) !important;
+    margin-top: 4px !important;
 }
 
 .ts-dropdown .optgroup-header {
-    padding: 10px 16px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border-color);
+    padding: 10px 16px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: var(--gold) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    background: var(--bg-tertiary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
 }
 
 .ts-dropdown .option {
-    padding: 12px 16px;
-    color: var(--text-primary);
-    font-size: 14px;
-    cursor: pointer;
-    transition: background var(--transition-fast);
+    padding: 12px 16px !important;
+    color: var(--text-primary) !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: background var(--transition-fast) !important;
 }
 
 .ts-dropdown .option:hover,
 .ts-dropdown .option.active {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
 }
 
 .ts-dropdown .option.selected {
-    background: rgba(201, 169, 98, 0.15);
-    color: var(--gold);
+    background: rgba(201, 169, 98, 0.15) !important;
+    color: var(--gold) !important;
 }
 
 .ts-dropdown .option .highlight {
-    background: rgba(201, 169, 98, 0.3);
-    border-radius: 2px;
+    background: rgba(201, 169, 98, 0.3) !important;
+    border-radius: 2px !important;
 }
 
-/* Tema oscuro */
-.theme-dark .ts-wrapper.single .ts-control {
-    background: var(--input-bg);
-    border-color: var(--input-border);
-}
-
-.theme-dark .ts-wrapper.single .ts-control > input {
-    color: var(--text-primary) !important;
-    background: transparent !important;
-    -webkit-text-fill-color: var(--text-primary) !important;
-}
-
-.theme-dark .ts-wrapper.single .ts-control > input::placeholder {
+/* No results */
+.ts-dropdown .no-results {
+    padding: 16px !important;
+    text-align: center !important;
     color: var(--text-tertiary) !important;
-    -webkit-text-fill-color: var(--text-tertiary) !important;
+    font-size: 14px !important;
+}
+
+/* Flecha */
+.ts-wrapper.single .ts-control::after {
+    border-color: var(--text-secondary) transparent transparent transparent !important;
+}
+
+/* =============================================
+   TEMA OSCURO - TOM SELECT (FORZADO)
+   ============================================= */
+
+.theme-dark .ts-wrapper.single .ts-control,
+.theme-dark .ts-control,
+.theme-dark .ts-wrapper.single.input-active .ts-control {
+    background: #242424 !important;
+    border-color: #404040 !important;
+}
+
+.theme-dark .ts-wrapper .ts-control input,
+.theme-dark .ts-wrapper .ts-control > input,
+.theme-dark .ts-wrapper.single .ts-control input,
+.theme-dark .ts-control input {
+    color: #F5F5F5 !important;
+    -webkit-text-fill-color: #F5F5F5 !important;
+    background: transparent !important;
+}
+
+.theme-dark .ts-wrapper .ts-control input::placeholder,
+.theme-dark .ts-control input::placeholder {
+    color: #707070 !important;
+    -webkit-text-fill-color: #707070 !important;
 }
 
 .theme-dark .ts-wrapper.single .ts-control .item {
-    color: var(--text-primary);
+    color: #F5F5F5 !important;
 }
 
 .theme-dark .ts-dropdown {
-    background: var(--bg-secondary);
-    border-color: var(--border-color);
+    background: #1A1A1A !important;
+    border-color: #333333 !important;
 }
 
 .theme-dark .ts-dropdown .optgroup-header {
-    background: var(--bg-primary);
+    background: #0D0D0D !important;
+    color: #C9A962 !important;
 }
 
 .theme-dark .ts-dropdown .option {
-    color: var(--text-primary);
+    color: #F5F5F5 !important;
 }
 
-.theme-dark .ts-dropdown .option .option-name {
-    color: var(--text-secondary);
+.theme-dark .ts-dropdown .option:hover,
+.theme-dark .ts-dropdown .option.active {
+    background: #242424 !important;
 }
 
-/* Forzar colores en el input para ambos temas */
-.ts-wrapper .ts-control input[type="text"] {
-    color: var(--text-primary) !important;
-    background-color: transparent !important;
-    -webkit-text-fill-color: var(--text-primary) !important;
-    caret-color: var(--gold) !important;
+/* =============================================
+   TEMA CLARO - TOM SELECT (FORZADO)
+   ============================================= */
+
+.theme-light .ts-wrapper.single .ts-control,
+.theme-light .ts-control,
+.theme-light .ts-wrapper.single.input-active .ts-control {
+    background: #FFFFFF !important;
+    border-color: #E0E0E0 !important;
+}
+
+.theme-light .ts-wrapper .ts-control input,
+.theme-light .ts-wrapper .ts-control > input,
+.theme-light .ts-wrapper.single .ts-control input,
+.theme-light .ts-control input {
+    color: #1A1A1A !important;
+    -webkit-text-fill-color: #1A1A1A !important;
+    background: transparent !important;
+}
+
+.theme-light .ts-wrapper .ts-control input::placeholder,
+.theme-light .ts-control input::placeholder {
+    color: #999999 !important;
+    -webkit-text-fill-color: #999999 !important;
+}
+
+.theme-light .ts-wrapper.single .ts-control .item {
+    color: #1A1A1A !important;
+}
+
+.theme-light .ts-dropdown {
+    background: #FFFFFF !important;
+    border-color: #E8E8E8 !important;
+}
+
+.theme-light .ts-dropdown .optgroup-header {
+    background: #F5F5F5 !important;
+}
+
+.theme-light .ts-dropdown .option {
+    color: #1A1A1A !important;
+}
+
+.theme-light .ts-dropdown .option:hover,
+.theme-light .ts-dropdown .option.active {
+    background: #F5F5F5 !important;
 }
 
 /* Placeholder */
