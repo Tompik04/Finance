@@ -394,23 +394,6 @@ body::before {
     background: #F5F5F5 !important;
 }
 
-/* Placeholder */
-.ts-wrapper.single .ts-control .item {
-    color: var(--text-primary);
-}
-
-.ts-wrapper.single .ts-control::after {
-    border-color: var(--text-secondary) transparent transparent transparent;
-}
-
-/* No results */
-.ts-dropdown .no-results {
-    padding: 16px;
-    text-align: center;
-    color: var(--text-tertiary);
-    font-size: 14px;
-}
-
 /* =============================================
    HEADER
    ============================================= */
@@ -537,6 +520,37 @@ body::before {
     background: var(--gold);
     color: #FFFFFF;
     border-color: var(--gold);
+}
+
+.btn-icon-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all var(--transition-fast);
+}
+
+.btn-icon-small:hover {
+    background: var(--gold);
+    color: #FFFFFF;
+    border-color: var(--gold);
+}
+
+.btn-icon-small.btn-danger-small {
+    color: var(--loss-color);
+}
+
+.btn-icon-small.btn-danger-small:hover {
+    background: var(--loss-color);
+    color: #FFFFFF;
+    border-color: var(--loss-color);
 }
 
 .btn-full {
@@ -738,6 +752,88 @@ body::before {
 }
 
 /* =============================================
+   SELECTOR DE TIPO DE DÓLAR
+   ============================================= */
+
+.dolar-type-container {
+    margin-bottom: 12px;
+}
+
+.dolar-options {
+    display: flex;
+    gap: 12px;
+}
+
+.dolar-option {
+    flex: 1;
+    cursor: pointer;
+}
+
+.dolar-option input[type="radio"] {
+    display: none;
+}
+
+.dolar-option-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.dolar-option input[type="radio"]:checked + .dolar-option-label {
+    border-color: var(--gold);
+    background: rgba(201, 169, 98, 0.1);
+}
+
+.dolar-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.dolar-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-top: 4px;
+}
+
+/* =============================================
+   COTIZACIONES USD EN RESUMEN
+   ============================================= */
+
+.usd-rates {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 8px;
+}
+
+.usd-rate {
+    text-align: center;
+}
+
+.usd-rate-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.usd-rate-value {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* =============================================
    SECCIONES PRINCIPALES
    ============================================= */
 
@@ -837,6 +933,14 @@ section {
     font-size: 18px;
     color: var(--gold);
     margin-top: 8px;
+}
+
+.summary-secondary.profit {
+    color: var(--profit-color);
+}
+
+.summary-secondary.loss {
+    color: var(--loss-color);
 }
 
 .summary-percent {
@@ -1047,6 +1151,33 @@ section {
     border-bottom: none;
 }
 
+/* Tablas compactas */
+.holdings-table.compact th,
+.holdings-table.compact td,
+.transactions-table.compact th,
+.transactions-table.compact td {
+    padding: 10px 12px;
+    font-size: 13px;
+}
+
+.holdings-table.compact td strong {
+    display: block;
+    font-size: 14px;
+}
+
+.holdings-table.compact td small,
+.transactions-table.compact td small {
+    display: block;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.holdings-table.compact td .no-price {
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
 .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -1067,6 +1198,25 @@ section {
 .empty-hint {
     font-size: 14px;
     color: var(--text-tertiary);
+}
+
+/* =============================================
+   HISTORIAL DESPLEGABLE
+   ============================================= */
+
+.transactions-content {
+    transition: all var(--transition-medium);
+    overflow: hidden;
+}
+
+.transactions-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+}
+
+.transactions-content:not(.collapsed) {
+    max-height: 2000px;
+    opacity: 1;
 }
 
 /* =============================================
@@ -1357,59 +1507,272 @@ section {
 }
 
 @media (max-width: 768px) {
-    .summary-cards-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .calendar-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .summary-value {
-        font-size: 36px;
-    }
-    
-    .auth-modal-content {
-        padding: 28px;
-    }
-    
-    .holdings-table,
-    .transactions-table {
-        font-size: 13px;
-    }
-    
-    .holdings-table th,
-    .transactions-table th,
-    .holdings-table td,
-    .transactions-table td {
-        padding: 12px;
-    }
-}
-
-@media (max-width: 480px) {
+    /* Header */
     .header-content {
         padding: 12px 16px;
+    }
+    
+    .logo {
+        font-size: 18px;
+    }
+    
+    .logo i {
+        font-size: 22px;
     }
     
     .logo span {
         display: none;
     }
     
-    .container {
-        padding: 0 16px;
+    /* Formulario de transacción */
+    .add-transaction-section {
+        padding-top: 80px;
     }
     
+    .transaction-form {
+        padding: 20px;
+        gap: 16px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    /* Selector de dólar */
+    .dolar-options {
+        gap: 8px;
+    }
+    
+    .dolar-option-label {
+        padding: 10px;
+    }
+    
+    .dolar-value {
+        font-size: 14px;
+    }
+    
+    /* Resumen */
+    .hero-section {
+        padding: 30px 0;
+    }
+    
+    .summary-card {
+        padding: 20px;
+    }
+    
+    .summary-card.main-value {
+        padding: 24px;
+    }
+    
+    .summary-value {
+        font-size: 32px;
+    }
+    
+    .summary-value.small {
+        font-size: 22px;
+    }
+    
+    .summary-secondary {
+        font-size: 14px;
+    }
+    
+    .summary-cards-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    /* Cotizaciones USD */
+    .usd-rates {
+        gap: 16px;
+    }
+    
+    .usd-rate-value {
+        font-size: 20px;
+    }
+    
+    /* Tablas */
+    .table-container {
+        border-radius: var(--radius-sm);
+    }
+    
+    .holdings-table.compact th,
+    .holdings-table.compact td,
+    .transactions-table.compact th,
+    .transactions-table.compact td {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+    
+    .holdings-table.compact td strong {
+        font-size: 12px;
+    }
+    
+    /* Ocultar columna de USD en móvil */
+    .holdings-table th:nth-child(6),
+    .holdings-table td:nth-child(6),
+    .transactions-table th:nth-child(5),
+    .transactions-table td:nth-child(5) {
+        display: none;
+    }
+    
+    /* Gráficos */
+    .chart-container {
+        height: 250px;
+    }
+    
+    .chart-card {
+        padding: 16px;
+    }
+    
+    .chart-card h3 {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+    
+    /* Calendario */
     .calendar-grid {
         grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    
+    .calendar-month {
+        padding: 10px;
+    }
+    
+    .calendar-month-name {
+        font-size: 11px;
+        margin-bottom: 8px;
+    }
+    
+    .calendar-day {
+        font-size: 8px;
+    }
+    
+    .calendar-year {
+        font-size: 24px;
+    }
+    
+    .calendar-controls {
+        gap: 16px;
+        margin-bottom: 20px;
     }
     
     .calendar-legend {
         flex-direction: column;
         align-items: center;
         gap: 12px;
+    }
+    
+    /* Sección títulos */
+    .section-title {
+        font-size: 18px;
+    }
+    
+    .section-header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    /* Market ticker */
+    .market-ticker {
+        gap: 12px;
+    }
+    
+    .ticker-item {
+        padding: 12px 16px;
+        min-width: 140px;
+        gap: 8px;
+    }
+    
+    .ticker-symbol {
+        font-size: 13px;
+    }
+    
+    .ticker-price {
+        font-size: 13px;
+    }
+    
+    .ticker-change {
+        font-size: 11px;
+        padding: 2px 6px;
+    }
+    
+    /* Container */
+    .container {
+        padding: 0 16px;
+    }
+    
+    /* Auth modal */
+    .auth-modal-content {
+        padding: 24px;
+        width: 100%;
+        max-width: 360px;
+    }
+    
+    .auth-header h2 {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 12px;
+    }
+    
+    .summary-value {
+        font-size: 28px;
+    }
+    
+    .summary-value.small {
+        font-size: 18px;
+    }
+    
+    .usd-rate-value {
+        font-size: 18px;
+    }
+    
+    /* Calendario aún más compacto */
+    .calendar-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Botones */
+    .btn-primary {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    
+    .btn-secondary {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .btn-icon {
+        width: 38px;
+        height: 38px;
+    }
+    
+    /* Toast */
+    .toast-container {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+    }
+    
+    .toast {
+        max-width: 100%;
+    }
+    
+    /* Tablas - ocultar más columnas */
+    .holdings-table th:nth-child(5),
+    .holdings-table td:nth-child(5) {
+        display: none;
     }
 }

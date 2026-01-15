@@ -104,7 +104,7 @@
                         Nueva Compra
                     </h2>
                     <button id="toggle-form" class="btn-secondary">
-                        <i class="fas fa-chevron-down"></i>
+                        <i class="fas fa-chevron-up"></i>
                     </button>
                 </div>
                 
@@ -248,6 +248,24 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="exchange-rate">Cotización USD del día</label>
+                            <div id="dolar-type-container" class="dolar-type-container hidden">
+                                <div class="dolar-options">
+                                    <label class="dolar-option">
+                                        <input type="radio" name="dolar-type" value="blue" checked>
+                                        <span class="dolar-option-label">
+                                            <span class="dolar-name">Blue</span>
+                                            <span id="dolar-blue-value" class="dolar-value">-</span>
+                                        </span>
+                                    </label>
+                                    <label class="dolar-option">
+                                        <input type="radio" name="dolar-type" value="oficial">
+                                        <span class="dolar-option-label">
+                                            <span class="dolar-name">Oficial</span>
+                                            <span id="dolar-oficial-value" class="dolar-value">-</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
                             <input type="number" id="exchange-rate" min="0" step="0.01" required placeholder="Seleccioná una fecha primero">
                             <small id="exchange-rate-hint" style="color: var(--text-tertiary); font-size: 11px; margin-top: 4px;">
                                 Se autocompleta al elegir fecha
@@ -287,14 +305,22 @@
                         </div>
                         <div class="summary-card">
                             <span class="summary-label">Ganancia / Pérdida</span>
-                            <!-- Valor principal ARS -->
                             <span id="total-profit" class="summary-value small profit">$0</span>
                             <span id="total-profit-percent" class="summary-percent">0%</span>
+                            <span id="total-profit-usd" class="summary-secondary profit">+$0.00 USD (0%)</span>
                         </div>
-
                         <div class="summary-card">
                             <span class="summary-label">Cotización USD</span>
-                            <span id="current-usd" class="summary-value small">$0</span>
+                            <div class="usd-rates">
+                                <div class="usd-rate">
+                                    <span class="usd-rate-label">Blue</span>
+                                    <span id="current-usd-blue" class="usd-rate-value">$0</span>
+                                </div>
+                                <div class="usd-rate">
+                                    <span class="usd-rate-label">Oficial</span>
+                                    <span id="current-usd-oficial" class="usd-rate-value">$0</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -349,17 +375,17 @@
                     Mis Tenencias
                 </h2>
                 <div class="table-container">
-                    <table id="holdings-table" class="holdings-table">
+                    <table id="holdings-table" class="holdings-table compact">
                         <thead>
                             <tr>
                                 <th>Acción</th>
-                                <th>Cantidad</th>
-                                <th>Precio Compra</th>
-                                <th>Valor Actual</th>
-                                <th>Ganancia ARS</th>
-                                <th>Ganancia USD</th>
+                                <th>Cant.</th>
+                                <th>Precio Compra (c/u)</th>
+                                <th>Precio Actual (c/u)</th>
+                                <th>G/P ARS</th>
+                                <th>G/P USD</th>
                                 <th>%</th>
-                                <th>Acciones</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="holdings-body">
@@ -371,34 +397,6 @@
                     <i class="fas fa-inbox"></i>
                     <p>No tienes acciones registradas aún</p>
                     <p class="empty-hint">Agrega tu primera compra arriba</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Historial de Transacciones -->
-        <section class="transactions-section">
-            <div class="container">
-                <h2 class="section-title">
-                    <i class="fas fa-history"></i>
-                    Historial de Compras
-                </h2>
-                <div class="table-container">
-                    <table id="transactions-table" class="transactions-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Acción</th>
-                                <th>Cantidad</th>
-                                <th>Invertido ARS</th>
-                                <th>USD al momento</th>
-                                <th>Invertido USD</th>
-                                <th>Eliminar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactions-body">
-                            <!-- Se llena dinámicamente -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </section>
@@ -430,6 +428,41 @@
                     <div class="legend-item">
                         <span class="legend-color high"></span>
                         <span>Inversión alta</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Historial de Transacciones (DESPLEGABLE) -->
+        <section class="transactions-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i>
+                        Historial de Compras
+                    </h2>
+                    <button id="toggle-history" class="btn-secondary">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div id="transactions-content" class="transactions-content collapsed">
+                    <div class="table-container">
+                        <table id="transactions-table" class="transactions-table compact">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Acción</th>
+                                    <th>Cant.</th>
+                                    <th>Total ARS</th>
+                                    <th>USD</th>
+                                    <th>Total USD</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-body">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
