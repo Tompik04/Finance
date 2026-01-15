@@ -93,7 +93,10 @@ function setupEventListeners() {
     // Navegación del calendario
     document.getElementById('prev-year').addEventListener('click', () => changeCalendarYear(-1));
     document.getElementById('next-year').addEventListener('click', () => changeCalendarYear(1));
-}
+    
+    // Cambio de fecha - buscar cotización histórica
+    document.getElementById('purchase-date').addEventListener('change', handleDateChange);
+    }
 
 // =============================================
 // SELECTOR DE ACCIONES CON BÚSQUEDA
@@ -431,8 +434,70 @@ async function fetchUSDRate() {
         }
     } catch (error) {
         console.warn('Error fetching USD rate:', error);
-        // Mantener valor por defecto
         AppState.currentUSD = DEMO_DATA.currentUSD || 1150;
+    }
+}
+
+// Obtener cotización histórica del dólar para una fecha específica
+async function fetchHistoricalUSDRate(dateStr) {
+    try {
+        // API de Bluelytics con fecha histórica
+        const response = await fetch(`https://api.bluelytics.com.ar/v2/historical?day=${dateStr}`);
+        const data = await response.json();
+        
+        if (data && data.blue && data.blue.value_sell) {
+            return data.blue.value_sell;
+        } else if (data && data.oficial && data.oficial.value_sell) {
+            return data.oficial.value_sell;
+        }
+        
+        return null;
+    } catch (error) {
+        console.warn('Error fetching historical USD rate:', error);
+        return null;
+    }
+}
+
+// Manejar cambio de fecha en el formulario
+async function handleDateChange(e) {
+    const dateInput = e.target;
+    const dateValue = dateInput.value;
+    const exchangeRateInput = document.getElementById('exchange-rate');
+    
+    if (!dateValue) return;
+    
+    // Mostrar indicador de carga
+    exchangeRateInput.placeholder = 'Buscando cotización...';
+    exchangeRateInput.disabled = true;
+    
+    // Verificar si es la fecha de hoy
+    const today = new Date().toISOString().split('T')[0];
+    
+    let rate = null;
+    
+    if (dateValue === today) {
+        // Usar cotización actual
+        rate = AppState.currentUSD;
+    } else {
+        // Buscar cotización histórica
+        rate = await fetchHistoricalUSDRate(dateValue);
+    }
+    
+    // Actualizar el input
+    exchangeRateInput.disabled = false;
+    
+    if (rate) {
+        exchangeRateInput.value = Math.round(rate);
+        exchangeRateInput.placeholder = `Ej: ${Math.round(rate)}`;
+        
+        // Recalcular totales
+        calculateTotal();
+        
+        // Mostrar mensaje de éxito
+        showToast(`Cotización del ${formatDate(dateValue)}: $${Math.round(rate)}`, 'info');
+    } else {
+        exchangeRateInput.placeholder = 'No encontrada - ingresá manualmente';
+        exchangeRateInput.value = '';
     }
 }
 
