@@ -669,7 +669,9 @@ function updateSummary() {
     
     const totalValueUSD = totalValueARS / AppState.currentUSD;
     const totalProfit = totalValueARS - totalInvestedARS;
+    const totalProfitUSD = totalValueUSD - totalInvestedUSD;
     const profitPercent = totalInvestedARS > 0 ? (totalProfit / totalInvestedARS) * 100 : 0;
+    const profitPercentUSD = totalInvestedUSD > 0 ? (totalProfitUSD / totalInvestedUSD) * 100 : 0;
     
     document.getElementById('total-value-ars').textContent = formatCurrency(totalValueARS, 'ARS');
     document.getElementById('total-value-usd').textContent = `USD ${formatCurrency(totalValueUSD, 'USD')}`;
@@ -683,6 +685,14 @@ function updateSummary() {
     const percentEl = document.getElementById('total-profit-percent');
     percentEl.textContent = `${totalProfit >= 0 ? '+' : ''}${profitPercent.toFixed(2)}%`;
     percentEl.className = `summary-percent ${totalProfit >= 0 ? 'profit' : 'loss'}`;
+
+    const profitElUSD = document.getElementById('total-profit-usd');
+    profitEl.textContent = formatCurrency(totalProfitUSD, 'ARS');
+    profitEl.className = `summary-value small ${totalProfitUSD >= 0 ? 'profit' : 'loss'}`;
+    
+    const percentElUSD = document.getElementById('total-profit-percent-usd');
+    percentEl.textContent = `${totalProfitUSD >= 0 ? '+' : ''}${profitPercentUSD.toFixed(2)}%`;
+    percentEl.className = `summary-percent ${totalProfitUSD >= 0 ? 'profit' : 'loss'}`;
     
     document.getElementById('current-usd').textContent = formatCurrency(AppState.currentUSD, 'ARS');
 }
