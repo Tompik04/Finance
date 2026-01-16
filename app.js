@@ -1079,6 +1079,22 @@ function calculateTotal() {
 }
 
 // Formatear moneda con etiqueta visible (ARS/USD)
+// Formatear número sin símbolo de moneda (ARS)
+function formatNumber(value) {
+    return new Intl.NumberFormat('es-AR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(value);
+}
+
+// Formatear número sin símbolo de moneda (USD)
+function formatNumberUSD(value) {
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
+}
+
 function formatCurrencyWithLabel(value, currency) {
     if (currency === 'USD') {
         const formatted = new Intl.NumberFormat('en-US', {
