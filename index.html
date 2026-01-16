@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Tom Select para búsqueda en dropdown -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
@@ -56,7 +55,6 @@
                 <button class="auth-tab" data-tab="register">Registrarse</button>
             </div>
 
-            <!-- Login Form -->
             <form id="login-form" class="auth-form">
                 <div class="form-group">
                     <label for="login-user">Usuario</label>
@@ -72,7 +70,6 @@
                 </button>
             </form>
 
-            <!-- Register Form -->
             <form id="register-form" class="auth-form hidden">
                 <div class="form-group">
                     <label for="register-user">Usuario</label>
@@ -92,10 +89,10 @@
         </div>
     </div>
 
-    <!-- Contenido Principal (Solo visible después de login) -->
+    <!-- Contenido Principal -->
     <main id="main-content" class="main-content hidden">
         
-        <!-- Agregar Transacción - PRIMERO -->
+        <!-- Agregar Transacción -->
         <section class="add-transaction-section">
             <div class="container">
                 <div class="section-header">
@@ -268,14 +265,14 @@
                             </div>
                             <input type="number" id="exchange-rate" min="0" step="0.01" required placeholder="Seleccioná una fecha primero">
                             <small id="exchange-rate-hint" style="color: var(--text-tertiary); font-size: 11px; margin-top: 4px;">
-                                Se autocompleta al elegir fecha
+                                Se autocompleta al elegir fecha (Blue antes del 14/04/2025, Oficial después)
                             </small>
                         </div>
                         <div class="form-group">
                             <label>Total Invertido</label>
                             <div id="total-calculated" class="calculated-value">
-                                <span id="total-ars">$0 ARS</span>
-                                <span id="total-usd-calc" class="calculated-usd">≈ $0.00 USD</span>
+                                <span id="total-ars"><span class="currency-label">ARS</span> 0</span>
+                                <span id="total-usd-calc" class="calculated-usd">≈ <span class="currency-label">USD</span> 0.00</span>
                             </div>
                         </div>
                     </div>
@@ -294,31 +291,41 @@
                 <div class="portfolio-summary">
                     <div class="summary-card main-value">
                         <span class="summary-label">Patrimonio Total</span>
-                        <span id="total-value-ars" class="summary-value">$0</span>
-                        <span id="total-value-usd" class="summary-secondary">USD $0</span>
+                        <span id="total-value-ars" class="summary-value"><span class="currency-label">ARS</span> 0</span>
+                        <span id="total-value-usd" class="summary-secondary"><span class="currency-label">USD</span> 0</span>
                     </div>
                     <div class="summary-cards-row">
                         <div class="summary-card">
                             <span class="summary-label">Inversión Total</span>
-                            <span id="total-invested" class="summary-value small">$0</span>
-                            <span id="total-invested-usd" class="summary-secondary">USD $0</span>
+                            <span id="total-invested" class="summary-value small"><span class="currency-label">ARS</span> 0</span>
+                            <span id="total-invested-usd" class="summary-secondary"><span class="currency-label">USD</span> 0</span>
                         </div>
-                        <div class="summary-card">
+                        <div class="summary-card profit-card">
                             <span class="summary-label">Ganancia / Pérdida</span>
-                            <span id="total-profit" class="summary-value small profit">$0</span>
-                            <span id="total-profit-percent" class="summary-percent">0%</span>
-                            <span id="total-profit-usd" class="summary-secondary profit">+$0.00 USD (0%)</span>
+                            <div class="profit-container">
+                                <div class="profit-row profit-ars-row">
+                                    <span class="profit-currency-tag">ARS</span>
+                                    <span id="total-profit" class="profit-value profit">+0</span>
+                                    <span id="total-profit-percent" class="profit-percent profit">(0%)</span>
+                                </div>
+                                <div class="profit-divider"></div>
+                                <div class="profit-row profit-usd-row">
+                                    <span class="profit-currency-tag">USD</span>
+                                    <span id="total-profit-usd" class="profit-value-usd profit">+0.00</span>
+                                    <span id="total-profit-usd-percent" class="profit-percent-usd profit">(0%)</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="summary-card">
                             <span class="summary-label">Cotización USD</span>
                             <div class="usd-rates">
                                 <div class="usd-rate">
                                     <span class="usd-rate-label">Blue</span>
-                                    <span id="current-usd-blue" class="usd-rate-value">$0</span>
+                                    <span id="current-usd-blue" class="usd-rate-value"><span class="currency-label">ARS</span> 0</span>
                                 </div>
                                 <div class="usd-rate">
                                     <span class="usd-rate-label">Oficial</span>
-                                    <span id="current-usd-oficial" class="usd-rate-value">$0</span>
+                                    <span id="current-usd-oficial" class="usd-rate-value"><span class="currency-label">ARS</span> 0</span>
                                 </div>
                             </div>
                         </div>
@@ -389,7 +396,6 @@
                             </tr>
                         </thead>
                         <tbody id="holdings-body">
-                            <!-- Se llena dinámicamente -->
                         </tbody>
                     </table>
                 </div>
@@ -414,7 +420,6 @@
                     <button id="next-year" class="btn-icon"><i class="fas fa-chevron-right"></i></button>
                 </div>
                 <div id="calendar-grid" class="calendar-grid">
-                    <!-- Se genera dinámicamente -->
                 </div>
                 <div class="calendar-legend">
                     <div class="legend-item">
@@ -433,7 +438,7 @@
             </div>
         </section>
 
-        <!-- Historial de Transacciones (DESPLEGABLE) -->
+        <!-- Historial de Transacciones -->
         <section class="transactions-section">
             <div class="container">
                 <div class="section-header">
@@ -460,7 +465,6 @@
                                 </tr>
                             </thead>
                             <tbody id="transactions-body">
-                                <!-- Se llena dinámicamente -->
                             </tbody>
                         </table>
                     </div>
@@ -478,7 +482,6 @@
                     </button>
                 </div>
                 <div id="day-detail-content" class="day-detail-content">
-                    <!-- Se llena dinámicamente -->
                 </div>
             </div>
         </div>

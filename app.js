@@ -2,6 +2,11 @@
 // WEALTH PORTFOLIO - JavaScript Principal
 // =============================================
 
+// Fecha de corte para cambio de dólar (14 de abril de 2025)
+// Antes de esta fecha: Dólar Blue
+// Desde esta fecha en adelante: Dólar Oficial
+const DOLAR_SWITCH_DATE = '2025-04-14';
+
 // Estado global de la aplicación
 const AppState = {
     user: null,
@@ -20,15 +25,13 @@ const AppState = {
     pricesLoaded: false
 };
 
-// APIs gratuitas para precios (sin necesidad de key)
+// APIs gratuitas para precios
 const PRICE_APIS = {
-    // Proxies alternativos para Yahoo Finance
     proxies: [
         (symbol) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
         (symbol) => `https://corsproxy.io/?${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
         (symbol) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`
     ],
-    // Dólar Blue Argentina
     dolar: 'https://api.bluelytics.com.ar/v2/latest'
 };
 
@@ -41,76 +44,53 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initApp() {
-    // Cargar tema guardado
     loadTheme();
-    
-    // Configurar event listeners
     setupEventListeners();
-    
-    // Configurar fecha máxima en el input
     document.getElementById('purchase-date').max = new Date().toISOString().split('T')[0];
-    
-    // Inicializar Tom Select para búsqueda de acciones
     initStockSelector();
     
-    // Verificar si hay sesión guardada
     const savedUser = localStorage.getItem('wealthPortfolioUser');
     if (savedUser) {
         AppState.user = JSON.parse(savedUser);
         await loginSuccess();
     }
     
-    // Ocultar pantalla de carga
     setTimeout(() => {
         document.getElementById('loading-screen').classList.add('hidden');
     }, 800);
 }
 
 function setupEventListeners() {
-    // Toggle tema
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     
-    // Tabs de autenticación
     document.querySelectorAll('.auth-tab').forEach(tab => {
         tab.addEventListener('click', () => switchAuthTab(tab.dataset.tab));
     });
     
-    // Formularios de autenticación
     document.getElementById('login-form').addEventListener('submit', handleLogin);
     document.getElementById('register-form').addEventListener('submit', handleRegister);
-    
-    // Logout
     document.getElementById('logout-btn').addEventListener('click', handleLogout);
-    
-    // Toggle formulario de transacción
     document.getElementById('toggle-form').addEventListener('click', toggleTransactionForm);
-    
-    // Formulario de transacción
     document.getElementById('transaction-form').addEventListener('submit', handleAddTransaction);
     
-    // Cálculo automático del total
     document.getElementById('quantity').addEventListener('input', calculateTotal);
     document.getElementById('price-per-share').addEventListener('input', calculateTotal);
     document.getElementById('exchange-rate').addEventListener('input', calculateTotal);
     
-    // Navegación del calendario
     document.getElementById('prev-year').addEventListener('click', () => changeCalendarYear(-1));
     document.getElementById('next-year').addEventListener('click', () => changeCalendarYear(1));
     
-    // Cambio de fecha - buscar cotización histórica
     document.getElementById('purchase-date').addEventListener('change', handleDateChange);
     
-    // Cambio de tipo de dólar
     document.querySelectorAll('input[name="dolar-type"]').forEach(radio => {
         radio.addEventListener('change', handleDolarTypeChange);
     });
     
-    // Toggle historial de compras
     document.getElementById('toggle-history').addEventListener('click', toggleTransactionsHistory);
 }
 
 // =============================================
-// SELECTOR DE ACCIONES CON BÚSQUEDA
+// SELECTOR DE ACCIONES
 // =============================================
 
 function initStockSelector() {
@@ -120,23 +100,12 @@ function initStockSelector() {
         new TomSelect('#stock-select', {
             placeholder: 'Buscar acción...',
             searchField: ['text', 'value'],
-            sortField: {
-                field: 'text',
-                direction: 'asc'
-            },
+            sortField: { field: 'text', direction: 'asc' },
             render: {
-                option: function(data, escape) {
-                    return `<div class="option">${escape(data.text)}</div>`;
-                },
-                item: function(data, escape) {
-                    return `<div class="item">${escape(data.text)}</div>`;
-                },
-                optgroup_header: function(data, escape) {
-                    return `<div class="optgroup-header">${escape(data.label)}</div>`;
-                },
-                no_results: function(data, escape) {
-                    return `<div class="no-results">No se encontró "${escape(data.input)}"</div>`;
-                }
+                option: (data, escape) => `<div class="option">${escape(data.text)}</div>`,
+                item: (data, escape) => `<div class="item">${escape(data.text)}</div>`,
+                optgroup_header: (data, escape) => `<div class="optgroup-header">${escape(data.label)}</div>`,
+                no_results: (data, escape) => `<div class="no-results">No se encontró "${escape(data.input)}"</div>`
             },
             maxOptions: 200,
             openOnFocus: true,
@@ -146,7 +115,7 @@ function initStockSelector() {
 }
 
 // =============================================
-// TEMA CLARO/OSCURO
+// TEMA
 // =============================================
 
 function loadTheme() {
@@ -163,10 +132,7 @@ function toggleTheme() {
     localStorage.setItem('wealthPortfolioTheme', newTheme);
     updateThemeIcon(newTheme);
     
-    // Actualizar colores de los gráficos
-    if (AppState.user) {
-        updateCharts();
-    }
+    if (AppState.user) updateCharts();
 }
 
 function updateThemeIcon(theme) {
@@ -189,15 +155,12 @@ function switchAuthTab(tab) {
 
 async function handleLogin(e) {
     e.preventDefault();
-    
     const user = document.getElementById('login-user').value.trim();
     const password = document.getElementById('login-password').value;
-    
     showAuthError('');
     
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
-            // Modo demo
             const foundUser = DEMO_DATA.users.find(u => u.user === user && u.password === password);
             if (foundUser) {
                 AppState.user = { user: foundUser.user, name: foundUser.user };
@@ -207,7 +170,6 @@ async function handleLogin(e) {
                 showAuthError('Usuario o contraseña incorrectos');
             }
         } else {
-            // Llamar al Google Apps Script
             const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=login&user=${encodeURIComponent(user)}&password=${encodeURIComponent(password)}`);
             const data = await response.json();
             
@@ -227,15 +189,12 @@ async function handleLogin(e) {
 
 async function handleRegister(e) {
     e.preventDefault();
-    
     const user = document.getElementById('register-user').value.trim();
     const password = document.getElementById('register-password').value;
-    
     showAuthError('');
     
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
-            // Modo demo - simular registro
             if (DEMO_DATA.users.find(u => u.user === user)) {
                 showAuthError('Este usuario ya existe');
                 return;
@@ -246,7 +205,6 @@ async function handleRegister(e) {
             await loginSuccess();
             showToast('¡Cuenta creada exitosamente!', 'success');
         } else {
-            // Llamar al Google Apps Script
             const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=register&user=${encodeURIComponent(user)}&password=${encodeURIComponent(password)}`);
             const data = await response.json();
             
@@ -274,8 +232,6 @@ function handleLogout() {
     document.getElementById('auth-modal').classList.remove('hidden');
     document.getElementById('main-content').classList.add('hidden');
     document.getElementById('user-info').classList.add('hidden');
-    
-    // Limpiar formularios
     document.getElementById('login-form').reset();
     document.getElementById('register-form').reset();
     
@@ -288,16 +244,9 @@ async function loginSuccess() {
     document.getElementById('user-info').classList.remove('hidden');
     document.getElementById('user-name').textContent = AppState.user.user || AppState.user.name;
     
-    // Reinicializar selector de acciones si es necesario
     setTimeout(() => initStockSelector(), 100);
-    
-    // Cargar datos del usuario
     await loadUserData();
-    
-    // Actualizar interfaz
     updateUI();
-    
-    // Iniciar actualizaciones periódicas de precios
     startPriceUpdates();
 }
 
@@ -318,27 +267,18 @@ function showAuthError(message) {
 async function loadUserData() {
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
-            // Modo demo
             AppState.transactions = DEMO_DATA.transactions.filter(t => t.userId === AppState.user.user);
         } else {
-            // Llamar al Google Apps Script
             const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getTransactions&user=${encodeURIComponent(AppState.user.user)}`);
             const data = await response.json();
-            
             if (data.success) {
                 AppState.transactions = data.transactions || [];
             }
         }
         
-        // Calcular holdings
         calculateHoldings();
-        
-        // Obtener precios reales de las acciones
         await fetchRealPrices();
-        
-        // Obtener cotización del dólar
         await fetchUSDRate();
-        
     } catch (error) {
         console.error('Error cargando datos:', error);
         showToast('Error al cargar datos', 'error');
@@ -346,23 +286,18 @@ async function loadUserData() {
 }
 
 // =============================================
-// OBTENER PRECIOS REALES
+// PRECIOS Y DÓLAR
 // =============================================
 
 async function fetchRealPrices() {
     const uniqueTickers = new Set();
-    
-    // Agregar tickers de los holdings del usuario
     Object.keys(AppState.holdings).forEach(ticker => uniqueTickers.add(ticker));
-    
-    // Agregar tickers del mercado
     CONFIG.MARKET_SYMBOLS.forEach(symbol => {
         uniqueTickers.add(symbol);
         uniqueTickers.add(symbol + '.BA');
     });
     
     const promises = [];
-    
     for (const ticker of uniqueTickers) {
         promises.push(fetchStockPrice(ticker));
     }
@@ -370,7 +305,6 @@ async function fetchRealPrices() {
     await Promise.allSettled(promises);
     AppState.pricesLoaded = true;
     
-    // Actualizar hora de actualización
     const updateTimeEl = document.getElementById('market-update-time');
     if (updateTimeEl) {
         const now = new Date();
@@ -379,28 +313,18 @@ async function fetchRealPrices() {
 }
 
 async function fetchStockPrice(ticker) {
-    // Convertir ticker argentino a formato Yahoo
     let yahooSymbol = ticker;
     
-    // Si es un CEDEAR o acción argentina
-    if (ticker.endsWith('.BA')) {
-        yahooSymbol = ticker;
-    }
-    
-    // Intentar con cada proxy hasta que uno funcione
     for (const proxyFn of PRICE_APIS.proxies) {
         try {
             const url = proxyFn(yahooSymbol);
             const response = await fetch(url, { timeout: 5000 });
-            
             if (!response.ok) continue;
             
             const data = await response.json();
             
             if (data.chart && data.chart.result && data.chart.result[0]) {
-                const result = data.chart.result[0];
-                const meta = result.meta;
-                
+                const meta = data.chart.result[0].meta;
                 const currentPrice = meta.regularMarketPrice || meta.previousClose;
                 const previousClose = meta.previousClose || meta.chartPreviousClose;
                 const change = previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
@@ -413,20 +337,15 @@ async function fetchStockPrice(ticker) {
                 };
                 
                 if (ticker.endsWith('.BA')) {
-                    const shortTicker = ticker.replace('.BA', '');
-                    AppState.currentPrices[shortTicker] = AppState.currentPrices[ticker];
+                    AppState.currentPrices[ticker.replace('.BA', '')] = AppState.currentPrices[ticker];
                 }
-                
                 return true;
             }
         } catch (error) {
-            // Continuar con el siguiente proxy
             continue;
         }
     }
     
-    // Si todos los proxies fallan, usar precio de demo
-    console.warn(`No se pudo obtener precio para ${ticker}, usando fallback`);
     if (DEMO_DATA.currentPrices[ticker]) {
         AppState.currentPrices[ticker] = DEMO_DATA.currentPrices[ticker];
     }
@@ -448,41 +367,38 @@ async function fetchUSDRate() {
         }
     } catch (error) {
         console.warn('Error fetching USD rate:', error);
-        AppState.currentUSD = { blue: 1200, oficial: 1050 };
     }
 }
 
-// Obtener cotización histórica del dólar para una fecha específica
 async function fetchHistoricalUSDRate(dateStr) {
     try {
         const response = await fetch(`https://api.bluelytics.com.ar/v2/historical?day=${dateStr}`);
         const data = await response.json();
         
-        const rates = {
-            blue: null,
-            oficial: null
+        return {
+            blue: data?.blue?.value_sell || null,
+            oficial: data?.oficial?.value_sell || null
         };
-        
-        if (data) {
-            if (data.blue && data.blue.value_sell) {
-                rates.blue = data.blue.value_sell;
-            }
-            if (data.oficial && data.oficial.value_sell) {
-                rates.oficial = data.oficial.value_sell;
-            }
-        }
-        
-        return rates;
     } catch (error) {
         console.warn('Error fetching historical USD rate:', error);
         return null;
     }
 }
 
-// Manejar cambio de fecha en el formulario
+// Determinar qué tipo de dólar usar según la fecha
+function getDolarTypeForDate(dateStr) {
+    if (!dateStr) return 'blue';
+    return dateStr >= DOLAR_SWITCH_DATE ? 'oficial' : 'blue';
+}
+
+// Obtener la cotización actual según la fecha
+function getCurrentUSDForDate(dateStr) {
+    const type = getDolarTypeForDate(dateStr);
+    return AppState.currentUSD[type] || AppState.currentUSD.blue || 1200;
+}
+
 async function handleDateChange(e) {
-    const dateInput = e.target;
-    const dateValue = dateInput.value;
+    const dateValue = e.target.value;
     const exchangeRateInput = document.getElementById('exchange-rate');
     const dolarTypeContainer = document.getElementById('dolar-type-container');
     const dolarBlueLabel = document.getElementById('dolar-blue-value');
@@ -490,70 +406,49 @@ async function handleDateChange(e) {
     
     if (!dateValue) return;
     
-    // Mostrar indicador de carga
     exchangeRateInput.placeholder = 'Buscando cotización...';
     exchangeRateInput.disabled = true;
     
-    // Verificar si es la fecha de hoy
     const today = new Date().toISOString().split('T')[0];
-    
-    let rates = null;
-    
-    if (dateValue === today) {
-        rates = AppState.currentUSD;
-    } else {
-        rates = await fetchHistoricalUSDRate(dateValue);
-    }
+    let rates = dateValue === today ? AppState.currentUSD : await fetchHistoricalUSDRate(dateValue);
     
     exchangeRateInput.disabled = false;
     
     if (rates && (rates.blue || rates.oficial)) {
-        // Mostrar el contenedor de selección de tipo de dólar
-        if (dolarTypeContainer) {
-            dolarTypeContainer.classList.remove('hidden');
-        }
+        if (dolarTypeContainer) dolarTypeContainer.classList.remove('hidden');
         
-        // Actualizar las etiquetas con los valores
-        if (dolarBlueLabel && rates.blue) {
-            dolarBlueLabel.textContent = `$${Math.round(rates.blue)}`;
-        }
-        if (dolarOficialLabel && rates.oficial) {
-            dolarOficialLabel.textContent = `$${Math.round(rates.oficial)}`;
-        }
+        if (dolarBlueLabel && rates.blue) dolarBlueLabel.textContent = `$${Math.round(rates.blue)}`;
+        if (dolarOficialLabel && rates.oficial) dolarOficialLabel.textContent = `$${Math.round(rates.oficial)}`;
         
-        // Guardar las tasas en el dataset para usarlas después
         exchangeRateInput.dataset.blueRate = rates.blue || '';
         exchangeRateInput.dataset.oficialRate = rates.oficial || '';
         
-        // Por defecto seleccionar blue
-        const dolarTypeRadio = document.querySelector('input[name="dolar-type"]:checked');
-        const dolarType = dolarTypeRadio ? dolarTypeRadio.value : 'blue';
-        const selectedRate = dolarType === 'blue' ? rates.blue : rates.oficial;
+        // Seleccionar automáticamente según la fecha de corte
+        const recommendedType = getDolarTypeForDate(dateValue);
+        const radioToSelect = document.querySelector(`input[name="dolar-type"][value="${recommendedType}"]`);
+        if (radioToSelect) radioToSelect.checked = true;
+        
+        const selectedRate = recommendedType === 'blue' ? rates.blue : rates.oficial;
         
         if (selectedRate) {
             exchangeRateInput.value = Math.round(selectedRate);
             calculateTotal();
         }
         
-        showToast(`Cotizaciones del ${formatDate(dateValue)} cargadas`, 'info');
+        const typeLabel = recommendedType === 'blue' ? 'Blue' : 'Oficial';
+        showToast(`Usando dólar ${typeLabel} para ${formatDate(dateValue)}`, 'info');
     } else {
-        if (dolarTypeContainer) {
-            dolarTypeContainer.classList.add('hidden');
-        }
+        if (dolarTypeContainer) dolarTypeContainer.classList.add('hidden');
         exchangeRateInput.placeholder = 'No encontrada - ingresá manualmente';
         exchangeRateInput.value = '';
     }
 }
 
-// Nueva función para manejar el cambio de tipo de dólar
 function handleDolarTypeChange(e) {
-    const dolarType = e.target.value;
     const exchangeRateInput = document.getElementById('exchange-rate');
-    
-    const blueRate = exchangeRateInput.dataset.blueRate;
-    const oficialRate = exchangeRateInput.dataset.oficialRate;
-    
-    const selectedRate = dolarType === 'blue' ? blueRate : oficialRate;
+    const selectedRate = e.target.value === 'blue' 
+        ? exchangeRateInput.dataset.blueRate 
+        : exchangeRateInput.dataset.oficialRate;
     
     if (selectedRate) {
         exchangeRateInput.value = Math.round(parseFloat(selectedRate));
@@ -561,7 +456,6 @@ function handleDolarTypeChange(e) {
     }
 }
 
-// Actualizar precios cada 5 minutos
 function startPriceUpdates() {
     setInterval(async () => {
         await fetchRealPrices();
@@ -581,7 +475,6 @@ function calculateHoldings() {
                 quantity: 0,
                 totalInvestedARS: 0,
                 totalInvestedUSD: 0,
-                avgExchangeRate: 0,
                 transactions: []
             };
         }
@@ -592,7 +485,6 @@ function calculateHoldings() {
         AppState.holdings[t.ticker].transactions.push(t);
     });
     
-    // Calcular precio promedio
     Object.values(AppState.holdings).forEach(h => {
         h.avgPricePerShare = h.totalInvestedARS / h.quantity;
         h.avgExchangeRate = h.totalInvestedARS / h.totalInvestedUSD;
@@ -633,17 +525,14 @@ async function handleAddTransaction(e) {
     
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
-            // Modo demo
             DEMO_DATA.transactions.push(transaction);
             AppState.transactions.push(transaction);
         } else {
-            // Guardar en Google Sheets
             const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=addTransaction`, {
                 method: 'POST',
                 body: JSON.stringify(transaction)
             });
             const data = await response.json();
-            
             if (data.success) {
                 AppState.transactions.push(transaction);
             } else {
@@ -651,34 +540,19 @@ async function handleAddTransaction(e) {
             }
         }
         
-        // Actualizar interfaz
         calculateHoldings();
         updateUI();
         
-        // Limpiar formulario
         document.getElementById('transaction-form').reset();
-        document.getElementById('total-ars').textContent = '$0 ARS';
-        document.getElementById('total-usd-calc').textContent = '≈ $0.00 USD';
+        document.getElementById('total-ars').innerHTML = formatCurrencyWithLabel(0, 'ARS');
+        document.getElementById('total-usd-calc').innerHTML = `≈ ${formatCurrencyWithLabel(0, 'USD')}`;
         
-        // Resetear Tom Select
-        if (stockSelect.tomselect) {
-            stockSelect.tomselect.clear();
-        }
+        if (stockSelect.tomselect) stockSelect.tomselect.clear();
         
-        // Ocultar selector de dólar
         const dolarTypeContainer = document.getElementById('dolar-type-container');
-        if (dolarTypeContainer) {
-            dolarTypeContainer.classList.add('hidden');
-        }
-        
-        // Resetear radio de dólar a blue
-        const blueRadio = document.querySelector('input[name="dolar-type"][value="blue"]');
-        if (blueRadio) {
-            blueRadio.checked = true;
-        }
+        if (dolarTypeContainer) dolarTypeContainer.classList.add('hidden');
         
         showToast('Compra registrada exitosamente', 'success');
-        
     } catch (error) {
         console.error('Error guardando transacción:', error);
         showToast('Error al guardar la compra', 'error');
@@ -690,14 +564,12 @@ async function deleteTransaction(transactionId) {
     
     try {
         if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'TU_URL_DEL_SCRIPT_AQUI') {
-            // Modo demo
             const index = DEMO_DATA.transactions.findIndex(t => t.id === transactionId);
             if (index > -1) DEMO_DATA.transactions.splice(index, 1);
             
             const stateIndex = AppState.transactions.findIndex(t => t.id === transactionId);
             if (stateIndex > -1) AppState.transactions.splice(stateIndex, 1);
         } else {
-            // Eliminar de Google Sheets
             const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=deleteTransaction&id=${transactionId}&user=${encodeURIComponent(AppState.user.user)}`);
             const data = await response.json();
             
@@ -712,7 +584,6 @@ async function deleteTransaction(transactionId) {
         calculateHoldings();
         updateUI();
         showToast('Transacción eliminada', 'success');
-        
     } catch (error) {
         console.error('Error eliminando transacción:', error);
         showToast('Error al eliminar', 'error');
@@ -737,59 +608,74 @@ function updateSummary() {
     let totalInvestedARS = 0;
     let totalInvestedUSD = 0;
     
-    // Usar dólar blue para los cálculos generales
-    const currentUSDBlue = AppState.currentUSD.blue || 1200;
+    // Usar dólar oficial para cálculos actuales (después del 14/04/2025)
+    const currentUSD = AppState.currentUSD.oficial || 1100;
     
     Object.values(AppState.holdings).forEach(holding => {
         const priceData = AppState.currentPrices[holding.ticker] || 
-                         AppState.currentPrices[holding.ticker.replace('.BA', '')] ||
-                         null;
+                         AppState.currentPrices[holding.ticker.replace('.BA', '')] || null;
         
         const pricePerShareAtPurchase = holding.totalInvestedARS / holding.quantity;
         const currentPricePerShare = priceData ? priceData.price : pricePerShareAtPurchase;
         
-        const currentValue = holding.quantity * currentPricePerShare;
-        totalValueARS += currentValue;
+        totalValueARS += holding.quantity * currentPricePerShare;
         totalInvestedARS += holding.totalInvestedARS;
         totalInvestedUSD += holding.totalInvestedUSD;
     });
     
-    const totalValueUSD = totalValueARS / currentUSDBlue;
-    const totalProfit = totalValueARS - totalInvestedARS;
+    const totalValueUSD = totalValueARS / currentUSD;
+    const totalProfitARS = totalValueARS - totalInvestedARS;
     const totalProfitUSD = totalValueUSD - totalInvestedUSD;
-    const profitPercent = totalInvestedARS > 0 ? (totalProfit / totalInvestedARS) * 100 : 0;
+    const profitPercentARS = totalInvestedARS > 0 ? (totalProfitARS / totalInvestedARS) * 100 : 0;
     const profitPercentUSD = totalInvestedUSD > 0 ? (totalProfitUSD / totalInvestedUSD) * 100 : 0;
     
-    document.getElementById('total-value-ars').textContent = formatCurrency(totalValueARS, 'ARS');
-    document.getElementById('total-value-usd').textContent = `USD ${formatCurrency(totalValueUSD, 'USD')}`;
-    document.getElementById('total-invested').textContent = formatCurrency(totalInvestedARS, 'ARS');
-    document.getElementById('total-invested-usd').textContent = `USD ${formatCurrency(totalInvestedUSD, 'USD')}`;
+    // Valores principales
+    document.getElementById('total-value-ars').innerHTML = formatCurrencyWithLabel(totalValueARS, 'ARS');
+    document.getElementById('total-value-usd').innerHTML = formatCurrencyWithLabel(totalValueUSD, 'USD');
+    document.getElementById('total-invested').innerHTML = formatCurrencyWithLabel(totalInvestedARS, 'ARS');
+    document.getElementById('total-invested-usd').innerHTML = formatCurrencyWithLabel(totalInvestedUSD, 'USD');
     
     // Ganancia/Pérdida en ARS
+    const profitClass = totalProfitARS >= 0 ? 'profit' : 'loss';
+    
     const profitEl = document.getElementById('total-profit');
-    profitEl.textContent = formatCurrency(totalProfit, 'ARS');
-    profitEl.className = `summary-value small ${totalProfit >= 0 ? 'profit' : 'loss'}`;
-    
-    const percentEl = document.getElementById('total-profit-percent');
-    percentEl.textContent = `${totalProfit >= 0 ? '+' : ''}${profitPercent.toFixed(2)}%`;
-    percentEl.className = `summary-percent ${totalProfit >= 0 ? 'profit' : 'loss'}`;
-    
-    // Ganancia/Pérdida en USD
-    const profitUSDEl = document.getElementById('total-profit-usd');
-    if (profitUSDEl) {
-        profitUSDEl.textContent = `${totalProfitUSD >= 0 ? '+' : ''}${formatCurrency(totalProfitUSD, 'USD')} (${totalProfitUSD >= 0 ? '+' : ''}${profitPercentUSD.toFixed(2)}%)`;
-        profitUSDEl.className = `summary-secondary ${totalProfitUSD >= 0 ? 'profit' : 'loss'}`;
+    if (profitEl) {
+        profitEl.textContent = `${totalProfitARS >= 0 ? '+' : ''}${formatNumber(totalProfitARS)}`;
+        profitEl.className = `profit-value ${profitClass}`;
     }
     
-    // Mostrar ambas cotizaciones
-    const blueRate = AppState.currentUSD.blue || 1200;
-    const oficialRate = AppState.currentUSD.oficial || 1050;
+    const percentEl = document.getElementById('total-profit-percent');
+    if (percentEl) {
+        percentEl.textContent = `(${totalProfitARS >= 0 ? '+' : ''}${profitPercentARS.toFixed(2)}%)`;
+        percentEl.className = `profit-percent ${profitClass}`;
+    }
     
+    // Actualizar color del fondo de la fila ARS
+    const arsRow = document.querySelector('.profit-ars-row');
+    if (arsRow) {
+        arsRow.style.background = totalProfitARS >= 0 ? 'var(--profit-bg)' : 'var(--loss-bg)';
+    }
+    
+    // Ganancia/Pérdida en USD
+    const profitUSDClass = totalProfitUSD >= 0 ? 'profit' : 'loss';
+    
+    const profitUSDEl = document.getElementById('total-profit-usd');
+    if (profitUSDEl) {
+        profitUSDEl.textContent = `${totalProfitUSD >= 0 ? '+' : ''}${formatNumberUSD(totalProfitUSD)}`;
+        profitUSDEl.className = `profit-value-usd ${profitUSDClass}`;
+    }
+    
+    const profitUSDPercentEl = document.getElementById('total-profit-usd-percent');
+    if (profitUSDPercentEl) {
+        profitUSDPercentEl.textContent = `(${totalProfitUSD >= 0 ? '+' : ''}${profitPercentUSD.toFixed(2)}%)`;
+        profitUSDPercentEl.className = `profit-percent-usd ${profitUSDClass}`;
+    }
+    
+    // Cotizaciones USD
     const blueEl = document.getElementById('current-usd-blue');
     const oficialEl = document.getElementById('current-usd-oficial');
-    
-    if (blueEl) blueEl.textContent = formatCurrency(blueRate, 'ARS');
-    if (oficialEl) oficialEl.textContent = formatCurrency(oficialRate, 'ARS');
+    if (blueEl) blueEl.innerHTML = formatCurrencyWithLabel(AppState.currentUSD.blue || 1200, 'ARS');
+    if (oficialEl) oficialEl.innerHTML = formatCurrencyWithLabel(AppState.currentUSD.oficial || 1050, 'ARS');
 }
 
 function updateMarketTicker() {
@@ -797,10 +683,8 @@ function updateMarketTicker() {
     ticker.innerHTML = '';
     
     CONFIG.MARKET_SYMBOLS.forEach(symbol => {
-        // Buscar precio con diferentes formatos
         const priceData = AppState.currentPrices[symbol + '.BA'] || 
-                         AppState.currentPrices[symbol] || 
-                         { price: 0, change: 0 };
+                         AppState.currentPrices[symbol] || { price: 0, change: 0 };
         
         const item = document.createElement('div');
         item.className = 'ticker-item';
@@ -810,7 +694,7 @@ function updateMarketTicker() {
         
         item.innerHTML = `
             <span class="ticker-symbol">${symbol}</span>
-            <span class="ticker-price">${price > 0 ? formatCurrency(price, 'ARS') : 'Cargando...'}</span>
+            <span class="ticker-price">${price > 0 ? formatCurrencyWithLabel(price, 'ARS') : 'Cargando...'}</span>
             <span class="ticker-change ${change >= 0 ? 'positive' : 'negative'}">
                 ${change !== 0 ? (change >= 0 ? '+' : '') + change.toFixed(2) + '%' : '--'}
             </span>
@@ -824,8 +708,8 @@ function updateHoldingsTable() {
     const noHoldings = document.getElementById('no-holdings');
     const holdings = Object.values(AppState.holdings);
     
-    // Usar dólar blue para cálculos
-    const currentUSDBlue = AppState.currentUSD.blue || 1200;
+    const today = new Date().toISOString().split('T')[0];
+    const currentUSDRate = getCurrentUSDForDate(today);
     
     if (holdings.length === 0) {
         tbody.innerHTML = '';
@@ -838,21 +722,13 @@ function updateHoldingsTable() {
     
     holdings.forEach(holding => {
         const priceData = AppState.currentPrices[holding.ticker] || 
-                         AppState.currentPrices[holding.ticker.replace('.BA', '')] ||
-                         null;
+                         AppState.currentPrices[holding.ticker.replace('.BA', '')] || null;
         
-        // Precio promedio de compra POR ACCIÓN
         const avgPricePerShare = holding.totalInvestedARS / holding.quantity;
-        
-        // Precio actual POR ACCIÓN
         const currentPricePerShare = priceData ? priceData.price : avgPricePerShare;
-        
-        // Valor actual total
         const currentValueARS = holding.quantity * currentPricePerShare;
-        
-        // Ganancia/pérdida
         const profitARS = currentValueARS - holding.totalInvestedARS;
-        const profitUSD = profitARS / currentUSDBlue;
+        const profitUSD = profitARS / currentUSDRate;
         const profitPercent = holding.totalInvestedARS > 0 ? (profitARS / holding.totalInvestedARS) * 100 : 0;
         
         const row = document.createElement('tr');
@@ -862,16 +738,16 @@ function updateHoldingsTable() {
                 <small>${holding.tickerName || ''}</small>
             </td>
             <td>${holding.quantity.toFixed(2)}</td>
-            <td>${formatCurrency(avgPricePerShare, 'ARS')}</td>
+            <td>${formatCurrencyWithLabel(avgPricePerShare, 'ARS')}</td>
             <td>
-                ${formatCurrency(currentPricePerShare, 'ARS')}
+                ${formatCurrencyWithLabel(currentPricePerShare, 'ARS')}
                 ${priceData ? '' : '<small class="no-price">(sin cotización)</small>'}
             </td>
             <td class="${profitARS >= 0 ? 'text-profit' : 'text-loss'}">
-                ${profitARS >= 0 ? '+' : ''}${formatCurrency(profitARS, 'ARS')}
+                ${profitARS >= 0 ? '+' : ''}${formatCurrencyWithLabel(profitARS, 'ARS')}
             </td>
             <td class="${profitUSD >= 0 ? 'text-profit' : 'text-loss'}">
-                ${profitUSD >= 0 ? '+' : ''}${formatCurrency(profitUSD, 'USD')}
+                ${profitUSD >= 0 ? '+' : ''}${formatCurrencyWithLabel(profitUSD, 'USD')}
             </td>
             <td class="${profitPercent >= 0 ? 'text-profit' : 'text-loss'}">
                 ${profitPercent >= 0 ? '+' : ''}${profitPercent.toFixed(2)}%
@@ -890,7 +766,6 @@ function updateTransactionsTable() {
     const tbody = document.getElementById('transactions-body');
     tbody.innerHTML = '';
     
-    // Ordenar por fecha descendente
     const sortedTransactions = [...AppState.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
     
     sortedTransactions.forEach(t => {
@@ -902,9 +777,9 @@ function updateTransactionsTable() {
                 <small>${t.tickerName || ''}</small>
             </td>
             <td>${t.quantity.toFixed(2)}</td>
-            <td>${formatCurrency(t.priceARS, 'ARS')}</td>
-            <td>${formatCurrency(t.exchangeRate, 'ARS')}</td>
-            <td>${formatCurrency(t.priceUSD, 'USD')}</td>
+            <td>${formatCurrencyWithLabel(t.priceARS, 'ARS')}</td>
+            <td>${formatCurrencyWithLabel(t.exchangeRate, 'ARS')}</td>
+            <td>${formatCurrencyWithLabel(t.priceUSD, 'USD')}</td>
             <td>
                 <button class="btn-icon-small btn-danger-small" onclick="deleteTransaction('${t.id}')" title="Eliminar">
                     <i class="fas fa-trash"></i>
@@ -928,10 +803,7 @@ function updatePieChart() {
     const ctx = document.getElementById('portfolio-pie-chart').getContext('2d');
     const holdings = Object.values(AppState.holdings);
     
-    // Destruir gráfico anterior si existe
-    if (AppState.charts.pie) {
-        AppState.charts.pie.destroy();
-    }
+    if (AppState.charts.pie) AppState.charts.pie.destroy();
     
     if (holdings.length === 0) {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -940,31 +812,17 @@ function updatePieChart() {
     
     const data = holdings.map(h => {
         const priceData = AppState.currentPrices[h.ticker] || 
-                         AppState.currentPrices[h.ticker.replace('.BA', '')] ||
-                         null;
+                         AppState.currentPrices[h.ticker.replace('.BA', '')] || null;
         const pricePerShare = priceData ? priceData.price : (h.totalInvestedARS / h.quantity);
         return h.quantity * pricePerShare;
     });
     
     const labels = holdings.map(h => h.ticker.replace('.BA', ''));
     
-    // Colores más variados
     const colors = [
-        '#C9A962', // Dorado
-        '#4CAF50', // Verde
-        '#2196F3', // Azul
-        '#FF5722', // Naranja
-        '#9C27B0', // Púrpura
-        '#00BCD4', // Cyan
-        '#E91E63', // Rosa
-        '#FF9800', // Ámbar
-        '#607D8B', // Gris azulado
-        '#8BC34A', // Verde claro
-        '#3F51B5', // Índigo
-        '#F44336', // Rojo
-        '#009688', // Teal
-        '#FFEB3B', // Amarillo
-        '#795548'  // Marrón
+        '#C9A962', '#4CAF50', '#2196F3', '#FF5722', '#9C27B0',
+        '#00BCD4', '#E91E63', '#FF9800', '#607D8B', '#8BC34A',
+        '#3F51B5', '#F44336', '#009688', '#FFEB3B', '#795548'
     ];
     
     AppState.charts.pie = new Chart(ctx, {
@@ -985,10 +843,9 @@ function updatePieChart() {
                     position: 'right',
                     labels: {
                         color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
-                        padding: 16,
-                        font: {
-                            family: 'JetBrains Mono, monospace'
-                        }
+                        padding: 10,
+                        boxWidth: 12,
+                        font: { family: 'JetBrains Mono, monospace', size: 10 }
                     }
                 },
                 tooltip: {
@@ -1009,10 +866,7 @@ function updateBarChart() {
     const ctx = document.getElementById('performance-bar-chart').getContext('2d');
     const holdings = Object.values(AppState.holdings);
     
-    // Destruir gráfico anterior si existe
-    if (AppState.charts.bar) {
-        AppState.charts.bar.destroy();
-    }
+    if (AppState.charts.bar) AppState.charts.bar.destroy();
     
     if (holdings.length === 0) {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -1021,8 +875,7 @@ function updateBarChart() {
     
     const data = holdings.map(h => {
         const priceData = AppState.currentPrices[h.ticker] || 
-                         AppState.currentPrices[h.ticker.replace('.BA', '')] ||
-                         null;
+                         AppState.currentPrices[h.ticker.replace('.BA', '')] || null;
         const pricePerShare = priceData ? priceData.price : (h.totalInvestedARS / h.quantity);
         const currentValue = h.quantity * pricePerShare;
         const profit = currentValue - h.totalInvestedARS;
@@ -1044,48 +897,34 @@ function updateBarChart() {
                 label: 'Rendimiento %',
                 data: data,
                 backgroundColor: colors,
-                borderRadius: 8
+                borderRadius: 6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
-                            return `${context.parsed.y >= 0 ? '+' : ''}${context.parsed.y.toFixed(2)}%`;
-                        }
+                        label: (context) => `${context.parsed.y >= 0 ? '+' : ''}${context.parsed.y.toFixed(2)}%`
                     }
                 }
             },
             scales: {
                 y: {
-                    grid: {
-                        color: getComputedStyle(document.body).getPropertyValue('--border-color')
-                    },
+                    grid: { color: getComputedStyle(document.body).getPropertyValue('--border-color') },
                     ticks: {
                         color: getComputedStyle(document.body).getPropertyValue('--text-secondary'),
-                        callback: function(value) {
-                            return value + '%';
-                        },
-                        font: {
-                            family: 'JetBrains Mono, monospace'
-                        }
+                        callback: (value) => value + '%',
+                        font: { family: 'JetBrains Mono, monospace', size: 10 }
                     }
                 },
                 x: {
-                    grid: {
-                        display: false
-                    },
+                    grid: { display: false },
                     ticks: {
                         color: getComputedStyle(document.body).getPropertyValue('--text-secondary'),
-                        font: {
-                            family: 'JetBrains Mono, monospace'
-                        }
+                        font: { family: 'JetBrains Mono, monospace', size: 10 }
                     }
                 }
             }
@@ -1107,16 +946,12 @@ function updateCalendar() {
     
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     
-    // Agrupar transacciones por fecha
     const transactionsByDate = {};
     AppState.transactions.forEach(t => {
-        if (!transactionsByDate[t.date]) {
-            transactionsByDate[t.date] = [];
-        }
+        if (!transactionsByDate[t.date]) transactionsByDate[t.date] = [];
         transactionsByDate[t.date].push(t);
     });
     
-    // Calcular máximo para escala de colores
     let maxDayTotal = 0;
     Object.values(transactionsByDate).forEach(transactions => {
         const total = transactions.reduce((sum, t) => sum + t.priceARS, 0);
@@ -1135,18 +970,15 @@ function updateCalendar() {
         const daysDiv = document.createElement('div');
         daysDiv.className = 'calendar-days';
         
-        // Obtener primer día del mes y cantidad de días
         const firstDay = new Date(year, monthIndex, 1).getDay();
         const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
         
-        // Espacios vacíos antes del primer día
         for (let i = 0; i < firstDay; i++) {
             const empty = document.createElement('div');
             empty.className = 'calendar-day';
             daysDiv.appendChild(empty);
         }
         
-        // Días del mes
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const dayDiv = document.createElement('div');
@@ -1159,13 +991,9 @@ function updateCalendar() {
                 const intensity = total / maxDayTotal;
                 
                 dayDiv.classList.add('has-investment');
-                if (intensity < 0.33) {
-                    dayDiv.classList.add('investment-low');
-                } else if (intensity < 0.66) {
-                    dayDiv.classList.add('investment-medium');
-                } else {
-                    dayDiv.classList.add('investment-high');
-                }
+                if (intensity < 0.33) dayDiv.classList.add('investment-low');
+                else if (intensity < 0.66) dayDiv.classList.add('investment-medium');
+                else dayDiv.classList.add('investment-high');
                 
                 dayDiv.onclick = () => showDayDetail(dateStr, dayTransactions);
             }
@@ -1194,7 +1022,7 @@ function showDayDetail(date, transactions) {
     
     content.innerHTML = `
         <div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
-            <strong>Total del día:</strong> ${formatCurrency(totalDay, 'ARS')}
+            <strong>Total del día:</strong> ${formatCurrencyWithLabel(totalDay, 'ARS')}
         </div>
         ${transactions.map(t => `
             <div class="day-transaction">
@@ -1202,7 +1030,7 @@ function showDayDetail(date, transactions) {
                     <div class="day-transaction-stock">${t.ticker.replace('.BA', '')}</div>
                     <small style="color: var(--text-secondary)">${t.quantity} acciones</small>
                 </div>
-                <div class="day-transaction-amount">${formatCurrency(t.priceARS, 'ARS')}</div>
+                <div class="day-transaction-amount">${formatCurrencyWithLabel(t.priceARS, 'ARS')}</div>
             </div>
         `).join('')}
     `;
@@ -1214,11 +1042,8 @@ function closeDayModal() {
     document.getElementById('day-detail-modal').classList.add('hidden');
 }
 
-// Cerrar modal al hacer clic fuera
 document.getElementById('day-detail-modal')?.addEventListener('click', (e) => {
-    if (e.target.id === 'day-detail-modal') {
-        closeDayModal();
-    }
+    if (e.target.id === 'day-detail-modal') closeDayModal();
 });
 
 // =============================================
@@ -1228,7 +1053,6 @@ document.getElementById('day-detail-modal')?.addEventListener('click', (e) => {
 function toggleTransactionForm() {
     const form = document.getElementById('transaction-form');
     const icon = document.querySelector('#toggle-form i');
-    
     form.classList.toggle('collapsed');
     icon.classList.toggle('fa-chevron-down');
     icon.classList.toggle('fa-chevron-up');
@@ -1237,7 +1061,6 @@ function toggleTransactionForm() {
 function toggleTransactionsHistory() {
     const historyContent = document.getElementById('transactions-content');
     const icon = document.querySelector('#toggle-history i');
-    
     historyContent.classList.toggle('collapsed');
     icon.classList.toggle('fa-chevron-down');
     icon.classList.toggle('fa-chevron-up');
@@ -1251,10 +1074,29 @@ function calculateTotal() {
     const totalARS = quantity * pricePerShare;
     const totalUSD = exchangeRate > 0 ? totalARS / exchangeRate : 0;
     
-    document.getElementById('total-ars').textContent = formatCurrency(totalARS, 'ARS');
-    document.getElementById('total-usd-calc').textContent = `≈ ${formatCurrency(totalUSD, 'USD')}`;
+    document.getElementById('total-ars').innerHTML = formatCurrencyWithLabel(totalARS, 'ARS');
+    document.getElementById('total-usd-calc').innerHTML = `≈ ${formatCurrencyWithLabel(totalUSD, 'USD')}`;
 }
 
+// Formatear moneda con etiqueta visible (ARS/USD)
+function formatCurrencyWithLabel(value, currency) {
+    if (currency === 'USD') {
+        const formatted = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(Math.abs(value));
+        const sign = value < 0 ? '-' : '';
+        return `<span class="currency-label">usd</span>${sign}$${formatted}`;
+    }
+    const formatted = new Intl.NumberFormat('es-AR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(Math.abs(value));
+    const sign = value < 0 ? '-' : '';
+    return `<span class="currency-label">ars</span>${sign}$${formatted}`;
+}
+
+// Formatear moneda sin etiqueta
 function formatCurrency(value, currency) {
     if (currency === 'USD') {
         return new Intl.NumberFormat('en-US', {
@@ -1275,36 +1117,24 @@ function formatDate(dateStr) {
     
     try {
         let date;
-        
-        // Si es un objeto Date de Google Sheets (viene como string con formato diferente)
         if (typeof dateStr === 'object' && dateStr instanceof Date) {
             date = dateStr;
         } else if (typeof dateStr === 'string') {
-            // Si viene en formato YYYY-MM-DD
             if (dateStr.includes('-') && dateStr.length === 10) {
                 const parts = dateStr.split('-');
                 date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-            } 
-            // Si viene en formato con T (ISO)
-            else if (dateStr.includes('T')) {
+            } else if (dateStr.includes('T')) {
                 date = new Date(dateStr);
-            }
-            // Si viene en otro formato (como de Google Sheets)
-            else {
+            } else {
                 date = new Date(dateStr);
             }
         } else if (typeof dateStr === 'number') {
-            // Si viene como timestamp
             date = new Date(dateStr);
         } else {
             return String(dateStr);
         }
         
-        // Verificar si la fecha es válida
-        if (isNaN(date.getTime())) {
-            console.warn('Fecha inválida:', dateStr);
-            return String(dateStr);
-        }
+        if (isNaN(date.getTime())) return String(dateStr);
         
         return new Intl.DateTimeFormat('es-AR', {
             day: '2-digit',
@@ -1312,14 +1142,12 @@ function formatDate(dateStr) {
             year: 'numeric'
         }).format(date);
     } catch (e) {
-        console.warn('Error parsing date:', dateStr, e);
         return String(dateStr);
     }
 }
 
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
-    
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
@@ -1336,7 +1164,6 @@ function showToast(message, type = 'info') {
     
     container.appendChild(toast);
     
-    // Remover después de 4 segundos
     setTimeout(() => {
         toast.style.animation = 'slideIn 0.3s ease reverse';
         setTimeout(() => toast.remove(), 300);
@@ -1347,11 +1174,12 @@ function showHoldingDetail(ticker) {
     const holding = AppState.holdings[ticker];
     if (!holding) return;
     
-    const currentUSDBlue = AppState.currentUSD.blue || 1200;
+    const today = new Date().toISOString().split('T')[0];
+    const currentUSDRate = getCurrentUSDForDate(today);
     const currentPrice = AppState.currentPrices[ticker]?.price || holding.avgPricePerShare;
     const currentValue = holding.quantity * currentPrice;
     const profit = currentValue - holding.totalInvestedARS;
-    const profitUSD = profit / currentUSDBlue;
+    const profitUSD = profit / currentUSDRate;
     
     alert(`
 Detalle de ${ticker.replace('.BA', '')}
@@ -1366,7 +1194,6 @@ Transacciones: ${holding.transactions.length}
     `);
 }
 
-// Exponer funciones necesarias globalmente
 window.deleteTransaction = deleteTransaction;
 window.showHoldingDetail = showHoldingDetail;
 window.closeDayModal = closeDayModal;
