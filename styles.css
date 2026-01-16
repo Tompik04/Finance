@@ -483,8 +483,18 @@ body {
    COTIZACIONES USD EN RESUMEN
    ============================================= */
 
-.usd-rates { display: flex; justify-content: center; gap: 24px; margin-top: 8px; }
-.usd-rate { text-align: center; }
+.usd-rates { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    gap: 32px; 
+    margin-top: 12px;
+    width: 100%;
+}
+.usd-rate { 
+    text-align: center;
+    flex: 0 0 auto;
+}
 .usd-rate-label { display: block; font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px; }
 .usd-rate-value { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text-primary); }
 
@@ -1029,9 +1039,20 @@ section { padding: 48px 0; }
     .profit-percent { font-size: 12px; }
     .profit-ars-row, .profit-usd-row { margin: 0 -16px; padding: 10px 16px; }
     
-    .usd-rates { gap: 16px; }
+    .usd-rates { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    gap: 32px; 
+    padding: 8px 0;
+    }
     .usd-rate-value { font-size: 16px; }
-    
+    .summary-card:has(.usd-rates) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+   }
     .table-container { border-radius: var(--radius-sm); }
     
     .holdings-table.compact th,
