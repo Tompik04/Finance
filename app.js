@@ -948,8 +948,23 @@ function updateCalendar() {
     
     const transactionsByDate = {};
     AppState.transactions.forEach(t => {
-        if (!transactionsByDate[t.date]) transactionsByDate[t.date] = [];
-        transactionsByDate[t.date].push(t);
+        // Normalizar fecha a formato YYYY-MM-DD
+        let dateKey = t.date;
+        if (t.date && typeof t.date === 'string') {
+            // Si viene con T (ISO), tomar solo la parte de fecha
+            if (t.date.includes('T')) {
+                dateKey = t.date.split('T')[0];
+            }
+            // Si viene en otro formato, intentar parsearlo
+            else if (!t.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                const parsed = new Date(t.date);
+                if (!isNaN(parsed.getTime())) {
+                    dateKey = parsed.toISOString().split('T')[0];
+                }
+            }
+        }
+        if (!transactionsByDate[dateKey]) transactionsByDate[dateKey] = [];
+        transactionsByDate[dateKey].push(t);
     });
     
     let maxDayTotal = 0;
