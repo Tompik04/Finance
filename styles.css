@@ -538,6 +538,7 @@ section { padding: 48px 0; }
 .summary-card {
     display: flex;
     flex-direction: column;
+    justify-content: space-evenly;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-lg);
