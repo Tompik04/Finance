@@ -4,7 +4,7 @@
 
 const CONFIG = {
     // URL del Google Apps Script (Web App)
-    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxdgIKmMJ-qFjy1N2qZ9BdQgiiJgv4ifhKXkKhOKuu25qzSNXZK-h9E62N_RDpBOxZBfw/exec',
+    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxMqtO-yZBExfNKeFV7rDzg2M8DJruNfulOX60AB3hjOMt2mk8PI29qBu8b6zVKsHG9TQ/exec',
     
     // Moneda local
     LOCAL_CURRENCY: 'ARS',
