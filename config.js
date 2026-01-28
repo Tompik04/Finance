@@ -2,15 +2,9 @@
 // CONFIGURACIÓN - Wealth Portfolio
 // =============================================
 
-// IMPORTANTE: Reemplaza esta URL con la URL de tu Google Apps Script
-// Después de publicar tu script, copia la URL aquí
 const CONFIG = {
     // URL del Google Apps Script (Web App)
-    // Ejemplo: 'https://script.google.com/macros/s/AKfycbx.../exec'
-    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz87pxkcsMDOzp_kHU_25wzbWDvrCboC8PIShp4YbseXfVMtZKYV8mJM8VXAxsWgCdE8w/exec',
-    
-    // Símbolos para mostrar en el ticker del mercado
-    MARKET_SYMBOLS: ['GGAL', 'YPF', 'AAPL', 'GOOGL', 'MSFT', 'MELI'],
+    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxdgIKmMJ-qFjy1N2qZ9BdQgiiJgv4ifhKXkKhOKuu25qzSNXZK-h9E62N_RDpBOxZBfw/exec',
     
     // Moneda local
     LOCAL_CURRENCY: 'ARS',
@@ -33,54 +27,105 @@ const DEMO_DATA = {
             userId: 'demo',
             ticker: 'GGAL.BA',
             tickerName: 'Grupo Galicia',
-            date: '2024-01-15',
+            date: '2024-06-15',
             quantity: 100,
-            priceARS: 150000,
-            exchangeRate: 850,
-            priceUSD: 176.47
+            priceARS: 350000,
+            exchangeRate: 1100,
+            priceUSD: 318.18,
+            type: 'buy'
         },
         {
             id: '2',
-            userId: 'demo@demo.com',
+            userId: 'demo',
             ticker: 'YPF.BA',
             tickerName: 'YPF S.A.',
-            date: '2024-02-20',
+            date: '2024-07-20',
             quantity: 50,
-            priceARS: 200000,
-            exchangeRate: 900,
-            priceUSD: 222.22
+            priceARS: 260000,
+            exchangeRate: 1150,
+            priceUSD: 226.09,
+            type: 'buy'
         },
         {
             id: '3',
-            userId: 'demo@demo.com',
-            ticker: 'AAPL.BA',
-            tickerName: 'Apple',
-            date: '2024-03-10',
-            quantity: 25,
-            priceARS: 300000,
-            exchangeRate: 950,
-            priceUSD: 315.79
+            userId: 'demo',
+            ticker: 'MELI.BA',
+            tickerName: 'MercadoLibre',
+            date: '2024-08-10',
+            quantity: 10,
+            priceARS: 180000,
+            exchangeRate: 1200,
+            priceUSD: 150.00,
+            type: 'buy'
+        },
+        {
+            id: '4',
+            userId: 'demo',
+            ticker: 'SPY.BA',
+            tickerName: 'S&P 500 ETF',
+            date: '2024-09-05',
+            quantity: 20,
+            priceARS: 440000,
+            exchangeRate: 1250,
+            priceUSD: 352.00,
+            type: 'buy'
+        },
+        {
+            id: '5',
+            userId: 'demo',
+            ticker: 'QQQ.BA',
+            tickerName: 'Nasdaq 100 ETF',
+            date: '2024-10-12',
+            quantity: 15,
+            priceARS: 700000,
+            exchangeRate: 1300,
+            priceUSD: 538.46,
+            type: 'buy'
         }
     ],
+    sales: [
+        {
+            id: 's1',
+            userId: 'demo',
+            ticker: 'GGAL.BA',
+            tickerName: 'Grupo Galicia',
+            date: '2024-11-20',
+            quantity: 30,
+            priceARS: 135000,
+            exchangeRate: 1350,
+            priceUSD: 100.00,
+            profitARS: 30000,
+            profitUSD: 22.22,
+            type: 'sell'
+        }
+    ],
+    favoriteStocks: ['MELI.BA', 'AAPL.BA', 'MSFT.BA'],
     // Precios de respaldo si las APIs fallan
     currentPrices: {
-        'GGAL.BA': { price: 2150, change: 3.2 },
-        'GGAL': { price: 2150, change: 3.2 },
-        'YPF.BA': { price: 5200, change: -0.8 },
-        'YPF': { price: 5200, change: -0.8 },
-        'AAPL.BA': { price: 18500, change: 1.5 },
-        'AAPL': { price: 18500, change: 1.5 },
-        'GOOGL.BA': { price: 14200, change: 0.9 },
-        'GOOGL': { price: 14200, change: 0.9 },
-        'MSFT.BA': { price: 16800, change: 1.2 },
-        'MSFT': { price: 16800, change: 1.2 },
-        'MELI.BA': { price: 62000, change: 2.1 },
-        'MELI': { price: 62000, change: 2.1 },
+        'GGAL.BA': { price: 4500, change: 2.5 },
+        'GGAL': { price: 4500, change: 2.5 },
+        'YPF.BA': { price: 5800, change: -0.8 },
+        'YPF': { price: 5800, change: -0.8 },
+        'MELI.BA': { price: 22000, change: 1.2 },
+        'MELI': { price: 22000, change: 1.2 },
+        'SPY.BA': { price: 24500, change: 0.5 },
+        'SPY': { price: 24500, change: 0.5 },
+        'QQQ.BA': { price: 52000, change: 0.8 },
+        'QQQ': { price: 52000, change: 0.8 },
+        'AAPL.BA': { price: 23000, change: 1.1 },
+        'AAPL': { price: 23000, change: 1.1 },
+        'GOOGL.BA': { price: 19000, change: 0.9 },
+        'GOOGL': { price: 19000, change: 0.9 },
+        'MSFT.BA': { price: 21000, change: 1.5 },
+        'MSFT': { price: 21000, change: 1.5 },
+        'AMZN.BA': { price: 24000, change: 0.7 },
+        'TSLA.BA': { price: 28000, change: -1.2 },
+        'META.BA': { price: 62000, change: 2.1 },
+        'NVDA.BA': { price: 15000, change: 3.2 },
         'PAMP.BA': { price: 3400, change: -0.5 },
         'TXAR.BA': { price: 1850, change: 0.3 },
         'ALUA.BA': { price: 980, change: 1.1 },
-        'BBAR.BA': { price: 1320, change: 2.4 },
-        'BMA.BA': { price: 4100, change: 1.8 }
-    },
-    currentUSD: 1200
+        'BBAR.BA': { price: 1800, change: 2.4 },
+        'BMA.BA': { price: 5500, change: 1.8 }
+    }
 };

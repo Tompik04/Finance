@@ -92,76 +92,56 @@
     <!-- Contenido Principal -->
     <main id="main-content" class="main-content hidden">
         
-        <!-- Agregar Transacción -->
-        <section class="add-transaction-section">
+        <!-- 1. MERCADO HOY -->
+        <section class="market-section">
             <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-plus-circle"></i>
-                        Nueva Compra
-                    </h2>
-                    <button id="toggle-form" class="btn-secondary">
-                        <i class="fas fa-chevron-up"></i>
-                    </button>
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Mercado Hoy
+                </h2>
+                
+                <!-- Acciones principales (fijas) -->
+                <div class="market-subsection">
+                    <h4 class="market-subtitle">Principales</h4>
+                    <div id="market-ticker-main" class="market-ticker">
+                        <div class="ticker-item loading">
+                            <span class="ticker-symbol">Cargando...</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <form id="transaction-form" class="transaction-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="stock-select">Acción</label>
-                            <select id="stock-select" required>
-                                <option value="">Seleccionar acción...</option>
-                                <optgroup label="Argentina - Bancos">
+                <!-- Acciones personalizadas -->
+                <div class="market-subsection">
+                    <div class="market-subtitle-row">
+                        <h4 class="market-subtitle">Mis Favoritas</h4>
+                        <button id="edit-favorites-btn" class="btn-small" title="Editar favoritas">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                    <div id="market-ticker-custom" class="market-ticker">
+                        <div class="ticker-item empty">
+                            <span class="ticker-symbol">Seleccioná tus acciones favoritas</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Selector de favoritas (oculto por defecto) -->
+                    <div id="favorites-selector" class="favorites-selector hidden">
+                        <div class="favorites-selector-content">
+                            <label>Elegí hasta 5 acciones:</label>
+                            <select id="favorite-stocks-select" multiple>
+                                <optgroup label="Argentina">
                                     <option value="GGAL.BA">GGAL - Grupo Galicia</option>
+                                    <option value="YPF.BA">YPF - YPF S.A.</option>
                                     <option value="BBAR.BA">BBAR - Banco BBVA</option>
                                     <option value="BMA.BA">BMA - Banco Macro</option>
-                                    <option value="SUPV.BA">SUPV - Supervielle</option>
-                                    <option value="VALO.BA">VALO - Grupo Valores</option>
-                                    <option value="BYMA.BA">BYMA - Bolsas y Mercados</option>
-                                </optgroup>
-                                <optgroup label="Argentina - Energía">
-                                    <option value="YPF.BA">YPF - YPF S.A.</option>
                                     <option value="PAMP.BA">PAMP - Pampa Energía</option>
+                                    <option value="TXAR.BA">TXAR - Ternium</option>
+                                    <option value="ALUA.BA">ALUA - Aluar</option>
                                     <option value="CEPU.BA">CEPU - Central Puerto</option>
-                                    <option value="TGSU2.BA">TGSU2 - TGS</option>
-                                    <option value="TGNO4.BA">TGNO4 - TGN</option>
-                                    <option value="DGCU2.BA">DGCU2 - Distribuidora Gas Cuyana</option>
+                                    <option value="TECO2.BA">TECO2 - Telecom</option>
                                     <option value="EDN.BA">EDN - Edenor</option>
                                 </optgroup>
-                                <optgroup label="Argentina - Industria">
-                                    <option value="TXAR.BA">TXAR - Ternium Argentina</option>
-                                    <option value="ALUA.BA">ALUA - Aluar</option>
-                                    <option value="LOMA.BA">LOMA - Loma Negra</option>
-                                    <option value="MIRG.BA">MIRG - Mirgor</option>
-                                    <option value="HARG.BA">HARG - Holcim Argentina</option>
-                                    <option value="SEMI.BA">SEMI - Molinos Juan Semino</option>
-                                    <option value="MOLI.BA">MOLI - Molinos Río de la Plata</option>
-                                </optgroup>
-                                <optgroup label="Argentina - Agro y Otros">
-                                    <option value="CRES.BA">CRES - Cresud</option>
-                                    <option value="AGRO.BA">AGRO - Agrometal</option>
-                                    <option value="INVJ.BA">INVJ - Inversora Juramento</option>
-                                    <option value="AUSO.BA">AUSO - Autopistas del Sol</option>
-                                    <option value="TECO2.BA">TECO2 - Telecom</option>
-                                    <option value="COME.BA">COME - Sociedad Comercial del Plata</option>
-                                    <option value="IRSA.BA">IRSA - IRSA</option>
-                                    <option value="BHIP.BA">BHIP - Banco Hipotecario</option>
-                                </optgroup>
-                                <optgroup label="Argentina - ONs y Letras">
-                                    <option value="TEFO.BA">TEFO - Telefónica ON</option>
-                                    <option value="BPAT.BA">BPAT - Banco Patagonia ON</option>
-                                </optgroup>
-                                <optgroup label="CEDEARs - ETFs">
-                                    <option value="QQQ.BA">QQQ - Invesco QQQ (Nasdaq 100)</option>
-                                    <option value="SPY.BA">SPY - SPDR S&P 500</option>
-                                    <option value="DIA.BA">DIA - SPDR Dow Jones</option>
-                                    <option value="EEM.BA">EEM - iShares Emerging Markets</option>
-                                    <option value="XLF.BA">XLF - Financial Select Sector</option>
-                                    <option value="IWM.BA">IWM - iShares Russell 2000</option>
-                                    <option value="EWZ.BA">EWZ - iShares Brazil</option>
-                                    <option value="ARKK.BA">ARKK - ARK Innovation</option>
-                                </optgroup>
-                                <optgroup label="CEDEARs - Tecnología">
+                                <optgroup label="CEDEARs - Tech">
                                     <option value="AAPL.BA">AAPL - Apple</option>
                                     <option value="GOOGL.BA">GOOGL - Google</option>
                                     <option value="MSFT.BA">MSFT - Microsoft</option>
@@ -170,122 +150,34 @@
                                     <option value="META.BA">META - Meta</option>
                                     <option value="NVDA.BA">NVDA - Nvidia</option>
                                     <option value="NFLX.BA">NFLX - Netflix</option>
-                                    <option value="AMD.BA">AMD - AMD</option>
-                                    <option value="INTC.BA">INTC - Intel</option>
-                                    <option value="ORCL.BA">ORCL - Oracle</option>
-                                    <option value="CRM.BA">CRM - Salesforce</option>
-                                    <option value="ADBE.BA">ADBE - Adobe</option>
-                                    <option value="PYPL.BA">PYPL - PayPal</option>
-                                    <option value="UBER.BA">UBER - Uber</option>
-                                    <option value="SNAP.BA">SNAP - Snap</option>
-                                    <option value="SPOT.BA">SPOT - Spotify</option>
                                 </optgroup>
-                                <optgroup label="CEDEARs - Consumo">
-                                    <option value="MCD.BA">MCD - McDonald's</option>
-                                    <option value="KO.BA">KO - Coca Cola</option>
-                                    <option value="PEP.BA">PEP - PepsiCo</option>
-                                    <option value="WMT.BA">WMT - Walmart</option>
-                                    <option value="NKE.BA">NKE - Nike</option>
-                                    <option value="SBUX.BA">SBUX - Starbucks</option>
-                                    <option value="DIS.BA">DIS - Disney</option>
-                                    <option value="COST.BA">COST - Costco</option>
-                                    <option value="HD.BA">HD - Home Depot</option>
+                                <optgroup label="CEDEARs - ETFs">
+                                    <option value="SPY.BA">SPY - S&P 500</option>
+                                    <option value="QQQ.BA">QQQ - Nasdaq 100</option>
+                                    <option value="DIA.BA">DIA - Dow Jones</option>
+                                    <option value="EEM.BA">EEM - Emerging Markets</option>
                                 </optgroup>
-                                <optgroup label="CEDEARs - Finanzas">
-                                    <option value="JPM.BA">JPM - JP Morgan</option>
-                                    <option value="V.BA">V - Visa</option>
-                                    <option value="MA.BA">MA - Mastercard</option>
-                                    <option value="BAC.BA">BAC - Bank of America</option>
-                                    <option value="GS.BA">GS - Goldman Sachs</option>
-                                    <option value="BRK-B.BA">BRK.B - Berkshire Hathaway</option>
-                                </optgroup>
-                                <optgroup label="CEDEARs - Energía y Otros">
-                                    <option value="XOM.BA">XOM - ExxonMobil</option>
-                                    <option value="CVX.BA">CVX - Chevron</option>
-                                    <option value="BA.BA">BA - Boeing</option>
-                                    <option value="CAT.BA">CAT - Caterpillar</option>
-                                    <option value="JNJ.BA">JNJ - Johnson & Johnson</option>
-                                    <option value="PFE.BA">PFE - Pfizer</option>
-                                    <option value="UNH.BA">UNH - UnitedHealth</option>
-                                </optgroup>
-                                <optgroup label="CEDEARs - Latinoamérica">
+                                <optgroup label="CEDEARs - Otros">
                                     <option value="MELI.BA">MELI - MercadoLibre</option>
                                     <option value="GLOB.BA">GLOB - Globant</option>
-                                    <option value="DESP.BA">DESP - Despegar</option>
-                                    <option value="NU.BA">NU - Nubank</option>
-                                    <option value="VALE.BA">VALE - Vale</option>
-                                    <option value="PBR.BA">PBR - Petrobras</option>
-                                </optgroup>
-                                <optgroup label="USA">
-                                    <option value="AAPL">AAPL - Apple (NYSE)</option>
-                                    <option value="GOOGL">GOOGL - Google (NASDAQ)</option>
-                                    <option value="MSFT">MSFT - Microsoft (NASDAQ)</option>
-                                    <option value="AMZN">AMZN - Amazon (NASDAQ)</option>
-                                    <option value="TSLA">TSLA - Tesla (NASDAQ)</option>
+                                    <option value="KO.BA">KO - Coca Cola</option>
+                                    <option value="MCD.BA">MCD - McDonald's</option>
+                                    <option value="JPM.BA">JPM - JP Morgan</option>
+                                    <option value="V.BA">V - Visa</option>
                                 </optgroup>
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="purchase-date">Fecha de Compra</label>
-                            <input type="date" id="purchase-date" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="quantity">Cantidad de Acciones</label>
-                            <input type="number" id="quantity" min="0.01" step="0.01" required placeholder="Ej: 10">
-                        </div>
-                        <div class="form-group">
-                            <label for="price-per-share">Precio por Acción (ARS)</label>
-                            <input type="number" id="price-per-share" min="0" step="0.01" required placeholder="Ej: 15000">
+                            <button id="save-favorites-btn" class="btn-primary btn-small">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
                         </div>
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="exchange-rate">Cotización USD del día</label>
-                            <div id="dolar-type-container" class="dolar-type-container hidden">
-                                <div class="dolar-options">
-                                    <label class="dolar-option">
-                                        <input type="radio" name="dolar-type" value="blue" checked>
-                                        <span class="dolar-option-label">
-                                            <span class="dolar-name">Blue</span>
-                                            <span id="dolar-blue-value" class="dolar-value">-</span>
-                                        </span>
-                                    </label>
-                                    <label class="dolar-option">
-                                        <input type="radio" name="dolar-type" value="oficial">
-                                        <span class="dolar-option-label">
-                                            <span class="dolar-name">Oficial</span>
-                                            <span id="dolar-oficial-value" class="dolar-value">-</span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                            <input type="number" id="exchange-rate" min="0" step="0.01" required placeholder="Seleccioná una fecha primero">
-                            <small id="exchange-rate-hint" style="color: var(--text-tertiary); font-size: 11px; margin-top: 4px;">
-                                Se autocompleta al elegir fecha (Blue antes del 14/04/2025, Oficial después)
-                            </small>
-                        </div>
-                        <div class="form-group">
-                            <label>Total Invertido</label>
-                            <div id="total-calculated" class="calculated-value">
-                                <span id="total-ars"><span class="currency-label">ARS</span> 0</span>
-                                <span id="total-usd-calc" class="calculated-usd">≈ <span class="currency-label">USD</span> 0.00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-primary btn-full">
-                        <i class="fas fa-save"></i>
-                        <span>Guardar Compra</span>
-                    </button>
-                </form>
+                </div>
+                
+                <p id="market-update-time" class="market-update-time"></p>
             </div>
         </section>
 
-        <!-- Hero Section con resumen -->
+        <!-- 2. RESUMEN DEL PORTFOLIO -->
         <section class="hero-section">
             <div class="container">
                 <div class="portfolio-summary">
@@ -308,7 +200,6 @@
                                     <span id="total-profit" class="profit-value profit">+0</span>
                                     <span id="total-profit-percent" class="profit-percent profit">(0%)</span>
                                 </div>
-                                <div class="profit-divider"></div>
                                 <div class="profit-row profit-usd-row">
                                     <span class="profit-currency-tag">USD</span>
                                     <span id="total-profit-usd" class="profit-value-usd profit">+0.00</span>
@@ -334,47 +225,216 @@
             </div>
         </section>
 
-        <!-- Sección de Acciones Populares -->
-        <section class="market-section">
+        <!-- 3. NUEVA COMPRA / NUEVA VENTA -->
+        <section class="transaction-section">
             <div class="container">
-                <h2 class="section-title">
-                    <i class="fas fa-chart-line"></i>
-                    Mercado Hoy
-                </h2>
-                <div id="market-ticker" class="market-ticker">
-                    <div class="ticker-item loading">
-                        <span class="ticker-symbol">Cargando...</span>
-                    </div>
+                <!-- Tabs para Compra/Venta -->
+                <div class="transaction-tabs">
+                    <button class="transaction-tab active" data-type="buy">
+                        <i class="fas fa-plus-circle"></i>
+                        Nueva Compra
+                    </button>
+                    <button class="transaction-tab" data-type="sell">
+                        <i class="fas fa-minus-circle"></i>
+                        Nueva Venta
+                    </button>
                 </div>
-                <p id="market-update-time" class="market-update-time"></p>
+                
+                <!-- Formulario de COMPRA -->
+                <form id="buy-form" class="transaction-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="buy-stock-select">Acción</label>
+                            <select id="buy-stock-select" required>
+                                <option value="">Seleccionar acción...</option>
+                                <optgroup label="Argentina - Bancos">
+                                    <option value="GGAL.BA">GGAL - Grupo Galicia</option>
+                                    <option value="BBAR.BA">BBAR - Banco BBVA</option>
+                                    <option value="BMA.BA">BMA - Banco Macro</option>
+                                    <option value="SUPV.BA">SUPV - Supervielle</option>
+                                    <option value="VALO.BA">VALO - Grupo Valores</option>
+                                    <option value="BYMA.BA">BYMA - Bolsas y Mercados</option>
+                                </optgroup>
+                                <optgroup label="Argentina - Energía">
+                                    <option value="YPF.BA">YPF - YPF S.A.</option>
+                                    <option value="PAMP.BA">PAMP - Pampa Energía</option>
+                                    <option value="CEPU.BA">CEPU - Central Puerto</option>
+                                    <option value="TGSU2.BA">TGSU2 - TGS</option>
+                                    <option value="TGNO4.BA">TGNO4 - TGN</option>
+                                    <option value="EDN.BA">EDN - Edenor</option>
+                                </optgroup>
+                                <optgroup label="Argentina - Industria">
+                                    <option value="TXAR.BA">TXAR - Ternium Argentina</option>
+                                    <option value="ALUA.BA">ALUA - Aluar</option>
+                                    <option value="LOMA.BA">LOMA - Loma Negra</option>
+                                    <option value="MIRG.BA">MIRG - Mirgor</option>
+                                </optgroup>
+                                <optgroup label="Argentina - Otros">
+                                    <option value="CRES.BA">CRES - Cresud</option>
+                                    <option value="TECO2.BA">TECO2 - Telecom</option>
+                                    <option value="COME.BA">COME - Soc. Comercial del Plata</option>
+                                    <option value="IRSA.BA">IRSA - IRSA</option>
+                                </optgroup>
+                                <optgroup label="CEDEARs - ETFs">
+                                    <option value="QQQ.BA">QQQ - Invesco QQQ (Nasdaq 100)</option>
+                                    <option value="SPY.BA">SPY - SPDR S&P 500</option>
+                                    <option value="DIA.BA">DIA - SPDR Dow Jones</option>
+                                    <option value="EEM.BA">EEM - iShares Emerging Markets</option>
+                                </optgroup>
+                                <optgroup label="CEDEARs - Tecnología">
+                                    <option value="AAPL.BA">AAPL - Apple</option>
+                                    <option value="GOOGL.BA">GOOGL - Google</option>
+                                    <option value="MSFT.BA">MSFT - Microsoft</option>
+                                    <option value="AMZN.BA">AMZN - Amazon</option>
+                                    <option value="TSLA.BA">TSLA - Tesla</option>
+                                    <option value="META.BA">META - Meta</option>
+                                    <option value="NVDA.BA">NVDA - Nvidia</option>
+                                    <option value="NFLX.BA">NFLX - Netflix</option>
+                                </optgroup>
+                                <optgroup label="CEDEARs - Consumo">
+                                    <option value="MCD.BA">MCD - McDonald's</option>
+                                    <option value="KO.BA">KO - Coca Cola</option>
+                                    <option value="PEP.BA">PEP - PepsiCo</option>
+                                    <option value="WMT.BA">WMT - Walmart</option>
+                                    <option value="DIS.BA">DIS - Disney</option>
+                                </optgroup>
+                                <optgroup label="CEDEARs - Finanzas">
+                                    <option value="JPM.BA">JPM - JP Morgan</option>
+                                    <option value="V.BA">V - Visa</option>
+                                    <option value="MA.BA">MA - Mastercard</option>
+                                    <option value="GS.BA">GS - Goldman Sachs</option>
+                                </optgroup>
+                                <optgroup label="CEDEARs - Latinoamérica">
+                                    <option value="MELI.BA">MELI - MercadoLibre</option>
+                                    <option value="GLOB.BA">GLOB - Globant</option>
+                                    <option value="NU.BA">NU - Nubank</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="buy-date">Fecha de Compra</label>
+                            <input type="date" id="buy-date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="buy-quantity">Cantidad de Acciones</label>
+                            <input type="number" id="buy-quantity" min="0.01" step="0.01" required placeholder="Ej: 10">
+                        </div>
+                        <div class="form-group">
+                            <label for="buy-price">Precio por Acción (ARS)</label>
+                            <input type="number" id="buy-price" min="0" step="0.01" required placeholder="Ej: 15000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="buy-exchange-rate">Cotización USD del día</label>
+                            <div id="buy-dolar-type-container" class="dolar-type-container hidden">
+                                <div class="dolar-options">
+                                    <label class="dolar-option">
+                                        <input type="radio" name="buy-dolar-type" value="blue" checked>
+                                        <span class="dolar-option-label">
+                                            <span class="dolar-name">Blue</span>
+                                            <span id="buy-dolar-blue-value" class="dolar-value">-</span>
+                                        </span>
+                                    </label>
+                                    <label class="dolar-option">
+                                        <input type="radio" name="buy-dolar-type" value="oficial">
+                                        <span class="dolar-option-label">
+                                            <span class="dolar-name">Oficial</span>
+                                            <span id="buy-dolar-oficial-value" class="dolar-value">-</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            <input type="number" id="buy-exchange-rate" min="0" step="0.01" required placeholder="Seleccioná una fecha">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Invertido</label>
+                            <div class="calculated-value">
+                                <span id="buy-total-ars"><span class="currency-label">ARS</span> 0</span>
+                                <span id="buy-total-usd" class="calculated-usd">≈ <span class="currency-label">USD</span> 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-full btn-buy">
+                        <i class="fas fa-cart-plus"></i>
+                        <span>Registrar Compra</span>
+                    </button>
+                </form>
+                
+                <!-- Formulario de VENTA -->
+                <form id="sell-form" class="transaction-form hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sell-stock-select">Acción a Vender</label>
+                            <select id="sell-stock-select" required>
+                                <option value="">Seleccionar de mis tenencias...</option>
+                                <!-- Se llena dinámicamente con las acciones que el usuario tiene -->
+                            </select>
+                            <small id="sell-available-qty" class="available-qty"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="sell-date">Fecha de Venta</label>
+                            <input type="date" id="sell-date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sell-quantity">Cantidad a Vender</label>
+                            <input type="number" id="sell-quantity" min="0.01" step="0.01" required placeholder="Ej: 5">
+                        </div>
+                        <div class="form-group">
+                            <label for="sell-price">Precio de Venta por Acción (ARS)</label>
+                            <input type="number" id="sell-price" min="0" step="0.01" required placeholder="Ej: 18000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sell-exchange-rate">Cotización USD del día</label>
+                            <div id="sell-dolar-type-container" class="dolar-type-container hidden">
+                                <div class="dolar-options">
+                                    <label class="dolar-option">
+                                        <input type="radio" name="sell-dolar-type" value="blue" checked>
+                                        <span class="dolar-option-label">
+                                            <span class="dolar-name">Blue</span>
+                                            <span id="sell-dolar-blue-value" class="dolar-value">-</span>
+                                        </span>
+                                    </label>
+                                    <label class="dolar-option">
+                                        <input type="radio" name="sell-dolar-type" value="oficial">
+                                        <span class="dolar-option-label">
+                                            <span class="dolar-name">Oficial</span>
+                                            <span id="sell-dolar-oficial-value" class="dolar-value">-</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            <input type="number" id="sell-exchange-rate" min="0" step="0.01" required placeholder="Seleccioná una fecha">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Venta / Ganancia</label>
+                            <div class="calculated-value sell-calc">
+                                <span id="sell-total-ars"><span class="currency-label">ARS</span> 0</span>
+                                <span id="sell-profit" class="calculated-profit">G/P: <span class="currency-label">ARS</span> 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-full btn-sell">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Registrar Venta</span>
+                    </button>
+                </form>
             </div>
         </section>
 
-        <!-- Gráficos -->
-        <section class="charts-section">
-            <div class="container">
-                <h2 class="section-title">
-                    <i class="fas fa-chart-pie"></i>
-                    Análisis del Portfolio
-                </h2>
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <h3>Distribución del Patrimonio</h3>
-                        <div class="chart-container">
-                            <canvas id="portfolio-pie-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Rendimiento por Acción</h3>
-                        <div class="chart-container">
-                            <canvas id="performance-bar-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Tabla de Holdings -->
+        <!-- 4. MIS TENENCIAS -->
         <section class="holdings-section">
             <div class="container">
                 <h2 class="section-title">
@@ -407,7 +467,66 @@
             </div>
         </section>
 
-        <!-- Calendario -->
+        <!-- 5. HISTORIAL DE COMPRAS/VENTAS -->
+        <section class="transactions-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i>
+                        Historial de Operaciones
+                    </h2>
+                    <button id="toggle-history" class="btn-secondary">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div id="transactions-content" class="transactions-content collapsed">
+                    <div class="table-container">
+                        <table id="transactions-table" class="transactions-table compact">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Acción</th>
+                                    <th>Cant.</th>
+                                    <th>Total ARS</th>
+                                    <th>USD</th>
+                                    <th>G/P</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. ANÁLISIS DEL PORTFOLIO -->
+        <section class="charts-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Análisis del Portfolio
+                </h2>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Distribución del Patrimonio</h3>
+                        <div class="chart-container">
+                            <canvas id="portfolio-pie-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Rendimiento por Acción</h3>
+                        <div class="chart-container">
+                            <canvas id="performance-bar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. CALENDARIO DE INVERSIONES -->
         <section class="calendar-section">
             <div class="container">
                 <h2 class="section-title">
@@ -423,50 +542,16 @@
                 </div>
                 <div class="calendar-legend">
                     <div class="legend-item">
-                        <span class="legend-color low"></span>
-                        <span>Inversión baja</span>
+                        <span class="legend-color buy-low"></span>
+                        <span>Compra baja</span>
                     </div>
                     <div class="legend-item">
-                        <span class="legend-color medium"></span>
-                        <span>Inversión media</span>
+                        <span class="legend-color buy-high"></span>
+                        <span>Compra alta</span>
                     </div>
                     <div class="legend-item">
-                        <span class="legend-color high"></span>
-                        <span>Inversión alta</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Historial de Transacciones -->
-        <section class="transactions-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-history"></i>
-                        Historial de Compras
-                    </h2>
-                    <button id="toggle-history" class="btn-secondary">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                </div>
-                <div id="transactions-content" class="transactions-content collapsed">
-                    <div class="table-container">
-                        <table id="transactions-table" class="transactions-table compact">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Acción</th>
-                                    <th>Cant.</th>
-                                    <th>Total ARS</th>
-                                    <th>USD</th>
-                                    <th>Total USD</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody id="transactions-body">
-                            </tbody>
-                        </table>
+                        <span class="legend-color sell"></span>
+                        <span>Venta</span>
                     </div>
                 </div>
             </div>
