@@ -31,8 +31,12 @@ const AppState = {
 // APIs para precios
 const PRICE_APIS = {
     proxies: [
-        (symbol) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
-        (symbol) => `https://corsproxy.io/?${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`
+        // Proxy 1: corsproxy.org (más confiable)
+        (symbol) => `https://corsproxy.org/?${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
+        // Proxy 2: api.codetabs.com
+        (symbol) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)}`,
+        // Proxy 3: thingproxy
+        (symbol) => `https://thingproxy.freeboard.io/fetch/https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`
     ],
     dolar: 'https://api.bluelytics.com.ar/v2/latest'
 };
@@ -438,7 +442,19 @@ async function fetchStockPrice(ticker) {
     for (const proxyFn of PRICE_APIS.proxies) {
         try {
             const url = proxyFn(yahooSymbol);
-            const response = await fetch(url, { timeout: 5000 });
+            
+            // Timeout de 8 segundos usando AbortController
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            
+            const response = await fetch(url, { 
+                signal: controller.signal,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            clearTimeout(timeoutId);
             
             if (!response.ok) continue;
             
@@ -464,11 +480,12 @@ async function fetchStockPrice(ticker) {
                 return true;
             }
         } catch (error) {
+            // Silenciosamente continuar al siguiente proxy
             continue;
         }
     }
     
-    // Fallback
+    // Fallback a precios demo
     if (DEMO_DATA.currentPrices[ticker]) {
         AppState.currentPrices[ticker] = DEMO_DATA.currentPrices[ticker];
     }
