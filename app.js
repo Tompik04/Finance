@@ -610,14 +610,24 @@ function adjustCalendarYear() {
         ...AppState.sales.map(s => s.date)
     ].filter(d => d);
     
+    console.log('adjustCalendarYear - todas las fechas:', allDates);
+    
     if (allDates.length > 0) {
         const years = allDates.map(d => {
             const normalized = normalizeDate(d);
-            return normalized ? parseInt(normalized.split('-')[0]) : null;
+            if (normalized && normalized.length >= 4) {
+                const year = parseInt(normalized.substring(0, 4));
+                console.log('adjustCalendarYear - fecha:', d, '-> normalizada:', normalized, '-> año:', year);
+                return year;
+            }
+            return null;
         }).filter(y => y && !isNaN(y));
+        
+        console.log('adjustCalendarYear - años encontrados:', years);
         
         if (years.length > 0) {
             const maxYear = Math.max(...years);
+            console.log('adjustCalendarYear - año máximo:', maxYear);
             AppState.calendarYear = maxYear;
         }
     }
@@ -1352,24 +1362,39 @@ function updateCalendar() {
     const buysByDate = {};
     const sellsByDate = {};
     
+    // Debug: mostrar las transacciones y sus fechas
+    console.log('=== DEBUG CALENDARIO ===');
+    console.log('Transacciones:', AppState.transactions);
+    
     AppState.transactions.forEach(t => {
+        console.log('Fecha original:', t.date, 'Tipo:', typeof t.date);
         let dateKey = normalizeDate(t.date);
-        if (!buysByDate[dateKey]) buysByDate[dateKey] = [];
-        buysByDate[dateKey].push(t);
+        console.log('Fecha normalizada:', dateKey);
+        if (dateKey && dateKey.startsWith(String(year))) {
+            if (!buysByDate[dateKey]) buysByDate[dateKey] = [];
+            buysByDate[dateKey].push(t);
+        }
     });
     
     AppState.sales.forEach(s => {
         let dateKey = normalizeDate(s.date);
-        if (!sellsByDate[dateKey]) sellsByDate[dateKey] = [];
-        sellsByDate[dateKey].push(s);
+        if (dateKey && dateKey.startsWith(String(year))) {
+            if (!sellsByDate[dateKey]) sellsByDate[dateKey] = [];
+            sellsByDate[dateKey].push(s);
+        }
     });
+    
+    console.log('Compras agrupadas por fecha:', buysByDate);
+    console.log('Ventas agrupadas por fecha:', sellsByDate);
     
     // Calcular máximos
     let maxBuy = 0;
     Object.values(buysByDate).forEach(arr => {
-        const total = arr.reduce((sum, t) => sum + t.priceARS, 0);
+        const total = arr.reduce((sum, t) => sum + (t.priceARS || 0), 0);
         if (total > maxBuy) maxBuy = total;
     });
+    
+    if (maxBuy === 0) maxBuy = 1; // Evitar división por cero
     
     months.forEach((monthName, monthIndex) => {
         const monthDiv = document.createElement('div');
@@ -1402,11 +1427,10 @@ function updateCalendar() {
             const daySells = sellsByDate[dateStr];
             
             if (dayBuys && daySells) {
-                // Ambos: mostrar mixto
                 dayDiv.classList.add('has-mixed');
                 dayDiv.onclick = () => showDayDetail(dateStr, dayBuys, daySells);
             } else if (dayBuys) {
-                const total = dayBuys.reduce((sum, t) => sum + t.priceARS, 0);
+                const total = dayBuys.reduce((sum, t) => sum + (t.priceARS || 0), 0);
                 const intensity = total / maxBuy;
                 dayDiv.classList.add('has-buy');
                 dayDiv.classList.add(intensity > 0.5 ? 'buy-high' : 'buy-low');
@@ -1427,39 +1451,81 @@ function updateCalendar() {
 function normalizeDate(dateStr) {
     if (!dateStr) return '';
     
+    console.log('normalizeDate input:', dateStr, 'type:', typeof dateStr);
+    
     // Si es un objeto Date
     if (dateStr instanceof Date) {
         const year = dateStr.getFullYear();
         const month = String(dateStr.getMonth() + 1).padStart(2, '0');
         const day = String(dateStr.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        const result = `${year}-${month}-${day}`;
+        console.log('normalizeDate result (Date object):', result);
+        return result;
+    }
+    
+    // Si es número (fecha serial de Google Sheets/Excel)
+    if (typeof dateStr === 'number') {
+        // Google Sheets usa epoch desde 30/12/1899
+        const excelEpoch = new Date(1899, 11, 30);
+        const date = new Date(excelEpoch.getTime() + dateStr * 24 * 60 * 60 * 1000);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const result = `${year}-${month}-${day}`;
+        console.log('normalizeDate result (number):', result);
+        return result;
     }
     
     if (typeof dateStr === 'string') {
         // Ya está en formato YYYY-MM-DD
         if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            console.log('normalizeDate result (already YYYY-MM-DD):', dateStr);
             return dateStr;
         }
         
-        // Formato ISO con T
+        // Formato ISO con T (2025-11-13T00:00:00)
         if (dateStr.includes('T')) {
-            return dateStr.split('T')[0];
+            const result = dateStr.split('T')[0];
+            console.log('normalizeDate result (ISO with T):', result);
+            return result;
         }
         
-        // Formato DD/MM/YYYY o DD-MM-YYYY
-        const ddmmyyyy = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        // Formato con hora y zona (2025-11-13 00:00:00 GMT)
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}\s/)) {
+            const result = dateStr.split(' ')[0];
+            console.log('normalizeDate result (with time):', result);
+            return result;
+        }
+        
+        // Formato DD/MM/YYYY
+        const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (ddmmyyyy) {
             const [, day, month, year] = ddmmyyyy;
-            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            console.log('normalizeDate result (DD/MM/YYYY):', result);
+            return result;
         }
         
-        // Formato MM/DD/YYYY (US)
-        const mmddyyyy = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-        if (mmddyyyy) {
-            const parsed = new Date(dateStr);
-            if (!isNaN(parsed.getTime())) {
-                return parsed.toISOString().split('T')[0];
-            }
+        // Formato YYYY/MM/DD
+        const yyyymmdd = dateStr.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+        if (yyyymmdd) {
+            const [, year, month, day] = yyyymmdd;
+            const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            console.log('normalizeDate result (YYYY/MM/DD):', result);
+            return result;
+        }
+        
+        // Si es un string que parece un número, convertirlo
+        if (dateStr.match(/^\d+$/)) {
+            const num = parseInt(dateStr);
+            const excelEpoch = new Date(1899, 11, 30);
+            const date = new Date(excelEpoch.getTime() + num * 24 * 60 * 60 * 1000);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const result = `${year}-${month}-${day}`;
+            console.log('normalizeDate result (string number):', result);
+            return result;
         }
         
         // Intentar parsear como fecha genérica
@@ -1468,21 +1534,13 @@ function normalizeDate(dateStr) {
             const year = parsed.getFullYear();
             const month = String(parsed.getMonth() + 1).padStart(2, '0');
             const day = String(parsed.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+            const result = `${year}-${month}-${day}`;
+            console.log('normalizeDate result (parsed):', result);
+            return result;
         }
     }
     
-    // Si es número (fecha de Excel)
-    if (typeof dateStr === 'number') {
-        // Excel date serial number
-        const excelEpoch = new Date(1899, 11, 30);
-        const date = new Date(excelEpoch.getTime() + dateStr * 24 * 60 * 60 * 1000);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-    
+    console.log('normalizeDate: could not parse, returning as string:', String(dateStr));
     return String(dateStr);
 }
 
