@@ -392,6 +392,7 @@ async function loadUserData() {
         }
         
         calculateHoldings();
+        adjustCalendarYear();  // Ajustar año del calendario al año más reciente
         await fetchRealPrices();
         await fetchUSDRate();
         
@@ -601,6 +602,26 @@ function handleDolarTypeChange(e, formType) {
 // =============================================
 // CÁLCULOS DE HOLDINGS
 // =============================================
+
+function adjustCalendarYear() {
+    // Ajustar el año del calendario al año más reciente con transacciones
+    const allDates = [
+        ...AppState.transactions.map(t => t.date),
+        ...AppState.sales.map(s => s.date)
+    ].filter(d => d);
+    
+    if (allDates.length > 0) {
+        const years = allDates.map(d => {
+            const normalized = normalizeDate(d);
+            return normalized ? parseInt(normalized.split('-')[0]) : null;
+        }).filter(y => y && !isNaN(y));
+        
+        if (years.length > 0) {
+            const maxYear = Math.max(...years);
+            AppState.calendarYear = maxYear;
+        }
+    }
+}
 
 function calculateHoldings() {
     AppState.holdings = {};
@@ -1267,7 +1288,19 @@ function updateBarChart() {
     });
     
     const labels = holdings.map(h => h.ticker.replace('.BA', ''));
-    const colors = data.map(d => d >= 0 ? 'var(--profit-color)' : 'var(--loss-color)');
+    
+    // Colores según rendimiento con intensidad
+    const colors = data.map(d => {
+        if (d > 50) return '#1B5E20';      // Verde muy oscuro (>50%)
+        if (d > 20) return '#2E7D32';      // Verde oscuro (20-50%)
+        if (d > 5) return '#4CAF50';       // Verde medio (5-20%)
+        if (d > 0) return '#81C784';       // Verde claro (0-5%)
+        if (d === 0) return '#FFC107';     // Amarillo (neutro)
+        if (d > -5) return '#EF9A9A';      // Rojo claro (0 a -5%)
+        if (d > -20) return '#E57373';     // Rojo medio (-5 a -20%)
+        if (d > -50) return '#F44336';     // Rojo oscuro (-20 a -50%)
+        return '#B71C1C';                  // Rojo muy oscuro (<-50%)
+    });
     
     AppState.charts.bar = new Chart(ctx, {
         type: 'bar',
@@ -1393,13 +1426,64 @@ function updateCalendar() {
 
 function normalizeDate(dateStr) {
     if (!dateStr) return '';
-    if (typeof dateStr === 'string') {
-        if (dateStr.includes('T')) return dateStr.split('T')[0];
-        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
-        const parsed = new Date(dateStr);
-        if (!isNaN(parsed.getTime())) return parsed.toISOString().split('T')[0];
+    
+    // Si es un objeto Date
+    if (dateStr instanceof Date) {
+        const year = dateStr.getFullYear();
+        const month = String(dateStr.getMonth() + 1).padStart(2, '0');
+        const day = String(dateStr.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
-    return dateStr;
+    
+    if (typeof dateStr === 'string') {
+        // Ya está en formato YYYY-MM-DD
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            return dateStr;
+        }
+        
+        // Formato ISO con T
+        if (dateStr.includes('T')) {
+            return dateStr.split('T')[0];
+        }
+        
+        // Formato DD/MM/YYYY o DD-MM-YYYY
+        const ddmmyyyy = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (ddmmyyyy) {
+            const [, day, month, year] = ddmmyyyy;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        
+        // Formato MM/DD/YYYY (US)
+        const mmddyyyy = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (mmddyyyy) {
+            const parsed = new Date(dateStr);
+            if (!isNaN(parsed.getTime())) {
+                return parsed.toISOString().split('T')[0];
+            }
+        }
+        
+        // Intentar parsear como fecha genérica
+        const parsed = new Date(dateStr);
+        if (!isNaN(parsed.getTime())) {
+            const year = parsed.getFullYear();
+            const month = String(parsed.getMonth() + 1).padStart(2, '0');
+            const day = String(parsed.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    }
+    
+    // Si es número (fecha de Excel)
+    if (typeof dateStr === 'number') {
+        // Excel date serial number
+        const excelEpoch = new Date(1899, 11, 30);
+        const date = new Date(excelEpoch.getTime() + dateStr * 24 * 60 * 60 * 1000);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    return String(dateStr);
 }
 
 function changeCalendarYear(delta) {

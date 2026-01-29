@@ -999,14 +999,62 @@ section { padding: 48px 0; }
     padding: 12px 16px !important;
     color: var(--text-primary) !important;
     font-size: 14px !important;
+    background: transparent !important;
 }
 
-.ts-dropdown .option:hover { background: var(--bg-tertiary) !important; }
+.ts-dropdown .option:hover { 
+    background: var(--bg-tertiary) !important; 
+    color: var(--text-primary) !important;
+}
 
-.theme-dark .ts-wrapper.single .ts-control { background: #242424 !important; border-color: #404040 !important; }
-.theme-dark .ts-wrapper .ts-control input { color: #F5F5F5 !important; }
-.theme-dark .ts-dropdown { background: #1A1A1A !important; border-color: #333333 !important; }
-.theme-dark .ts-dropdown .option { color: #F5F5F5 !important; }
+.ts-dropdown .option.active,
+.ts-dropdown .option.selected {
+    background: rgba(201, 169, 98, 0.2) !important;
+    color: var(--gold) !important;
+}
+
+/* Modo oscuro - Tom Select */
+.theme-dark .ts-wrapper.single .ts-control,
+.theme-dark .ts-control { 
+    background: #242424 !important; 
+    border-color: #404040 !important; 
+    color: #F5F5F5 !important;
+}
+
+.theme-dark .ts-wrapper .ts-control input { 
+    color: #F5F5F5 !important; 
+}
+
+.theme-dark .ts-wrapper.single .ts-control .item {
+    color: #F5F5F5 !important;
+    background: transparent !important;
+}
+
+.theme-dark .ts-dropdown { 
+    background: #1A1A1A !important; 
+    border-color: #333333 !important; 
+}
+
+.theme-dark .ts-dropdown .optgroup-header {
+    background: #0D0D0D !important;
+    color: var(--gold) !important;
+}
+
+.theme-dark .ts-dropdown .option { 
+    color: #F5F5F5 !important; 
+    background: transparent !important;
+}
+
+.theme-dark .ts-dropdown .option:hover {
+    background: #242424 !important;
+    color: #F5F5F5 !important;
+}
+
+.theme-dark .ts-dropdown .option.active,
+.theme-dark .ts-dropdown .option.selected {
+    background: rgba(201, 169, 98, 0.25) !important;
+    color: var(--gold) !important;
+}
 
 /* =============================================
    FOOTER
