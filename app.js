@@ -610,25 +610,20 @@ function adjustCalendarYear() {
         ...AppState.sales.map(s => s.date)
     ].filter(d => d);
     
-    console.log('adjustCalendarYear - todas las fechas:', allDates);
-    
     if (allDates.length > 0) {
         const years = allDates.map(d => {
             const normalized = normalizeDate(d);
             if (normalized && normalized.length >= 4) {
                 const year = parseInt(normalized.substring(0, 4));
-                console.log('adjustCalendarYear - fecha:', d, '-> normalizada:', normalized, '-> año:', year);
                 return year;
             }
             return null;
         }).filter(y => y && !isNaN(y));
         
-        console.log('adjustCalendarYear - años encontrados:', years);
-        
         if (years.length > 0) {
             const maxYear = Math.max(...years);
-            console.log('adjustCalendarYear - año máximo:', maxYear);
             AppState.calendarYear = maxYear;
+            console.log('Calendario ajustado al año:', maxYear);
         }
     }
 }
@@ -1362,14 +1357,8 @@ function updateCalendar() {
     const buysByDate = {};
     const sellsByDate = {};
     
-    // Debug: mostrar las transacciones y sus fechas
-    console.log('=== DEBUG CALENDARIO ===');
-    console.log('Transacciones:', AppState.transactions);
-    
     AppState.transactions.forEach(t => {
-        console.log('Fecha original:', t.date, 'Tipo:', typeof t.date);
         let dateKey = normalizeDate(t.date);
-        console.log('Fecha normalizada:', dateKey);
         if (dateKey && dateKey.startsWith(String(year))) {
             if (!buysByDate[dateKey]) buysByDate[dateKey] = [];
             buysByDate[dateKey].push(t);
@@ -1384,8 +1373,7 @@ function updateCalendar() {
         }
     });
     
-    console.log('Compras agrupadas por fecha:', buysByDate);
-    console.log('Ventas agrupadas por fecha:', sellsByDate);
+    console.log(`Calendario ${year} - Compras:`, Object.keys(buysByDate).length, 'días, Ventas:', Object.keys(sellsByDate).length, 'días');
     
     // Calcular máximos
     let maxBuy = 0;
@@ -1394,7 +1382,7 @@ function updateCalendar() {
         if (total > maxBuy) maxBuy = total;
     });
     
-    if (maxBuy === 0) maxBuy = 1; // Evitar división por cero
+    if (maxBuy === 0) maxBuy = 1;
     
     months.forEach((monthName, monthIndex) => {
         const monthDiv = document.createElement('div');
@@ -1451,68 +1439,64 @@ function updateCalendar() {
 function normalizeDate(dateStr) {
     if (!dateStr) return '';
     
-    console.log('normalizeDate input:', dateStr, 'type:', typeof dateStr);
-    
     // Si es un objeto Date
     if (dateStr instanceof Date) {
         const year = dateStr.getFullYear();
         const month = String(dateStr.getMonth() + 1).padStart(2, '0');
         const day = String(dateStr.getDate()).padStart(2, '0');
-        const result = `${year}-${month}-${day}`;
-        console.log('normalizeDate result (Date object):', result);
-        return result;
+        return `${year}-${month}-${day}`;
     }
     
     // Si es número (fecha serial de Google Sheets/Excel)
     if (typeof dateStr === 'number') {
-        // Google Sheets usa epoch desde 30/12/1899
         const excelEpoch = new Date(1899, 11, 30);
         const date = new Date(excelEpoch.getTime() + dateStr * 24 * 60 * 60 * 1000);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        const result = `${year}-${month}-${day}`;
-        console.log('normalizeDate result (number):', result);
-        return result;
+        return `${year}-${month}-${day}`;
     }
     
     if (typeof dateStr === 'string') {
         // Ya está en formato YYYY-MM-DD
         if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            console.log('normalizeDate result (already YYYY-MM-DD):', dateStr);
             return dateStr;
         }
         
-        // Formato ISO con T (2025-11-13T00:00:00)
-        if (dateStr.includes('T')) {
-            const result = dateStr.split('T')[0];
-            console.log('normalizeDate result (ISO with T):', result);
-            return result;
+        // Formato ISO con T (2025-11-13T00:00:00) - pero NO el que tiene GMT
+        if (dateStr.includes('T') && !dateStr.includes('GMT') && dateStr.match(/^\d{4}-\d{2}-\d{2}T/)) {
+            return dateStr.split('T')[0];
+        }
+        
+        // Formato de Google Sheets: "Sat Jul 08 2023 00:00:00 GMT-0300 (hora estándar de Argentina)"
+        // o cualquier formato que JavaScript pueda parsear
+        if (dateStr.includes('GMT') || dateStr.match(/^[A-Za-z]{3}\s[A-Za-z]{3}\s\d{1,2}\s\d{4}/)) {
+            const parsed = new Date(dateStr);
+            if (!isNaN(parsed.getTime())) {
+                const year = parsed.getFullYear();
+                const month = String(parsed.getMonth() + 1).padStart(2, '0');
+                const day = String(parsed.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
         }
         
         // Formato con hora y zona (2025-11-13 00:00:00 GMT)
         if (dateStr.match(/^\d{4}-\d{2}-\d{2}\s/)) {
-            const result = dateStr.split(' ')[0];
-            console.log('normalizeDate result (with time):', result);
-            return result;
+            return dateStr.split(' ')[0];
         }
         
         // Formato DD/MM/YYYY
         const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (ddmmyyyy) {
             const [, day, month, year] = ddmmyyyy;
-            const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-            console.log('normalizeDate result (DD/MM/YYYY):', result);
-            return result;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
         }
         
         // Formato YYYY/MM/DD
         const yyyymmdd = dateStr.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
         if (yyyymmdd) {
             const [, year, month, day] = yyyymmdd;
-            const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-            console.log('normalizeDate result (YYYY/MM/DD):', result);
-            return result;
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
         }
         
         // Si es un string que parece un número, convertirlo
@@ -1523,9 +1507,7 @@ function normalizeDate(dateStr) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            const result = `${year}-${month}-${day}`;
-            console.log('normalizeDate result (string number):', result);
-            return result;
+            return `${year}-${month}-${day}`;
         }
         
         // Intentar parsear como fecha genérica
@@ -1534,14 +1516,11 @@ function normalizeDate(dateStr) {
             const year = parsed.getFullYear();
             const month = String(parsed.getMonth() + 1).padStart(2, '0');
             const day = String(parsed.getDate()).padStart(2, '0');
-            const result = `${year}-${month}-${day}`;
-            console.log('normalizeDate result (parsed):', result);
-            return result;
+            return `${year}-${month}-${day}`;
         }
     }
     
-    console.log('normalizeDate: could not parse, returning as string:', String(dateStr));
-    return String(dateStr);
+    return '';
 }
 
 function changeCalendarYear(delta) {
